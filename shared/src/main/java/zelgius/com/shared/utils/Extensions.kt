@@ -10,6 +10,7 @@ import android.R.color
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import kotlin.experimental.and
 import kotlin.math.roundToInt
 
 
@@ -35,3 +36,32 @@ fun Context.getColor(@ColorRes color: Int, alpha: Float) =
             Color.green(it),
             Color.blue(it))
     }
+
+
+fun ByteArray.toHexString(): String {
+    val hexArray = "0123456789ABCDEF".toCharArray()
+    val hexChars = CharArray(size * 2)
+    for (j in indices) {
+        val v = (this[j] and 0xFF.toByte()).toInt()
+
+        hexChars[j * 2] = hexArray[v ushr 4]
+        hexChars[j * 2 + 1] = hexArray[v and 0x0F]
+    }
+    return String(hexChars)
+}
+
+
+fun String.hexStringToByteArray() : ByteArray {
+    val HEX_CHARS = "0123456789ABCDEF"
+    val result = ByteArray(length / 2)
+
+    for (i in 0 until length step 2) {
+        val firstIndex = HEX_CHARS.indexOf(this[i]);
+        val secondIndex = HEX_CHARS.indexOf(this[i + 1]);
+
+        val octet = firstIndex.shl(4).or(secondIndex)
+        result.set(i.shr(1), octet.toByte())
+    }
+
+    return result
+}

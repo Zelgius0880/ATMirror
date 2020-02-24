@@ -42,4 +42,43 @@ Call back when a new switch signal is received. Must be in NEW SWITCH DISCOVERY 
 #### Frame 
 | b0  | b1 | b2 .. bn|
 | :-------------: | :-------------: | ------------- | 
-| 0x01 | 0x00 | The signal of the switch
+| 0x01 | 0xXX | The signal of the switch
+
+---
+### END OF NEW SWITCH DISCOVERING
+Message send to the mirror to interrupt the switch discovering
+
+| Number  |Size | Direction | ack|
+| :-------------: | :-------------: | :-------------: | :-------------: |
+|0x02|0|P -> M|&#9745;|
+
+#### Frame 
+| b0  | b1 |
+| :-------------: | :-------------: |
+| 0x02 | 0x00 |
+
+---
+### GET CURRENT STATUS
+Message send to the mirror to its current status
+
+| Number  |Size | Direction | ack|
+| :-------------: | :-------------: | :-------------: | :-------------: |
+|0x03|0|P -> M| |
+
+#### Frame 
+| b0  | b1 |
+| :-------------: | :-------------: |
+| 0x03 | 0x00 |
+
+---
+### CURRENT STATUS
+Response of GET CURRENT STATUS
+
+| Number  |Size | Direction | ack|
+| :-------------: | :-------------: | :-------------: | :-------------: |
+|0x03|1|P <- M| |
+
+#### Frame 
+| b0  | b1 | b2 |
+| :-------------: | :-------------: | ------------- |
+| 0x03 | 0x01 | - 0x00: Doing nothing <br> - 0x01: waiting for new switch
