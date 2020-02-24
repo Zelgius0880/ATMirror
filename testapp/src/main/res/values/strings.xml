@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">ATMirror</string>
+
+    <string name="pressure_title">Pressure</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="temperature_title">Temperature</string>
+    <string name="rh_title">RH</string>
+    <string name="elevation_title">Elevation</string>
+    <string name="forecast_temperature_format">%.1f°C at %s</string>
+    <string name="today">Today</string>
+</resources>

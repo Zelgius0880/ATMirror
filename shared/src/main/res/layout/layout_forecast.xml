@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content">
+
+    <View
+            android:layout_width="220dp"
+            android:layout_height="2dp"
+            android:background="@color/md_white_1000"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            android:id="@+id/view"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
+
+    <TextView
+            android:text="@string/elevation_title"
+            android:textAppearance="@style/TextAppearance.ATMirror.Headline4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="18dp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            android:textStyle="bold"
+            android:textSize="30sp"/>
+
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/forecast_temperature_format"
+            android:textAppearance="@style/TextAppearance.ATMirror.Headline5"
+            android:id="@+id/forecastTemperatureMax"
+            app:layout_constraintTop_toBottomOf="@+id/forecastImage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/forecast_temperature_format"
+            android:textAppearance="@style/TextAppearance.ATMirror.Headline5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/forecastTemperatureMax"
+            android:id="@+id/forecastTemperatureMin"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="%"
+            android:textAppearance="@style/TextAppearance.ATMirror.Headline5"
+            android:id="@+id/forecastPrecipitation"
+            app:layout_constraintBottom_toBottomOf="@+id/textView"
+            app:layout_constraintEnd_toEndOf="@+id/view"/>
+
+    <ImageView
+            android:src="@drawable/ic_wi_day_sunny"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:id="@+id/forecastImage"
+            android:tint="@color/md_white_1000"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ImageView
+            android:src="@drawable/ic_wi_raindrop"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/imageView"
+            android:tint="@color/md_light_blue_900"
+            app:layout_constraintTop_toTopOf="@+id/forecastPrecipitation"
+            app:layout_constraintDimensionRatio="h,1:1"
+            app:layout_constraintBottom_toBottomOf="@+id/forecastPrecipitation"
+            app:layout_constraintEnd_toStartOf="@+id/forecastPrecipitation"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

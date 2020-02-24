@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorSecondary">@color/secondaryColor</item>
+        <!--        <item name="android:windowTranslucentNavigation">true</item>
+                <item name="android:windowTranslucentStatus">true</item>-->
+        <item name="android:background">@color/md_black_1000</item>
+
+        <item name="textAppearanceHeadline1">@style/TextAppearance.ATMirror.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.ATMirror.Headline2</item>
+        <item name="textAppearanceHeadline3">@style/TextAppearance.ATMirror.Headline3</item>
+        <item name="textAppearanceHeadline4">@style/TextAppearance.ATMirror.Headline4</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.ATMirror.Headline5</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.ATMirror.Headline6</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.Transparent" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.Transparent.NoActionBar" parent="AppTheme.Transparent">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <style name="AppTheme.Widget.TextView" parent="android:Widget.TextView">
+        <item name="android:drawableTint">@color/md_white_1000</item>
+    </style>
+
+    <!--
+textAppearanceHeadline1 Light 96sp
+textAppearanceHeadline2	Light 60sp
+textAppearanceHeadline3	Regular 48sp
+textAppearanceHeadline4	Regular 34sp
+textAppearanceHeadline5	Regular 24sp
+textAppearanceHeadline6	Regular 20sp
+    -->
+    <style name="Widget.ATMirror.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="tint">@color/md_white_1000</item>
+    </style>
+
+    <style name="TextAppearance.ATMirror.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
+    </style>
+
+
+    <style name="TextAppearance.ATMirror.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
+    </style>
+
+
+    <style name="TextAppearance.ATMirror.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textColor">@color/md_white_1000</item>
+    </style>
+
+
+    <style name="TextAppearance.ATMirror.Headline4" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="tint">@color/md_white_1000</item>
+    </style>
+
+
+    <style name="TextAppearance.ATMirror.Headline5" parent="TextAppearance.MaterialComponents.Headline5">
+    </style>
+
+    <style name="TextAppearance.ATMirror.Headline6" parent="TextAppearance.MaterialComponents.Headline6">
+    </style>
+
+</resources>

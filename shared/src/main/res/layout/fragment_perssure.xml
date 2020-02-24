@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardUseCompatPadding="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:text="--- Pa"
+                android:textAppearance="@style/TextAppearance.ATMirror.Headline3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/rh"
+                android:textSize="54sp"
+                android:layout_marginStart="32dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/textView"
+                android:textStyle="bold"/>
+
+        <View
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:background="@color/md_white_1000"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintTop_toBottomOf="@+id/textView"
+                android:id="@+id/view"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"/>
+
+        <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:srcCompat="@drawable/ic_sun"
+                android:id="@+id/imageView"
+                android:tint="@color/md_white_1000"
+                android:layout_marginTop="32dp"
+                app:layout_constraintStart_toEndOf="@+id/rh"
+                android:layout_marginStart="32dp"
+                app:layout_constraintTop_toBottomOf="@+id/view"/>
+
+        <TextView
+                android:text="@string/pressure_title"
+                android:textAppearance="@style/TextAppearance.ATMirror.Headline4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="18dp"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="32dp"
+                android:textStyle="bold"/>
+
+        <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:srcCompat="@drawable/ic_curve_arrow_up"
+                android:id="@+id/prediction"
+                android:tint="@color/md_white_1000"
+                app:layout_constraintBottom_toBottomOf="@+id/textView"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintTop_toTopOf="@+id/textView"
+                app:layout_constraintDimensionRatio="w,1:1"/>
+
+        <com.jjoe64.graphview.GraphView
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                android:id="@+id/graphView"
+                app:seriesData="0=5;2=5;3=0;4=2"
+                app:seriesType="bar"
+                app:seriesColor="#ee0000"
+                app:layout_constraintTop_toBottomOf="@+id/imageView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
