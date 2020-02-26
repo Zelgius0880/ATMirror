@@ -12,7 +12,7 @@ class CurrentStatus: Protocol{
 
     val status: Status
 
-    constructor(status: Status = Status.NOT_WORKING): super(ByteArray(Code.CURRENT_STATUS.size)) {
+    constructor(status: Status = Status.NOT_WORKING): super(Code.CURRENT_STATUS.size) {
         rawPayload[0] = status.code
         this.status = status
     }
