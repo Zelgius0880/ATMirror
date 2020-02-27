@@ -1,4 +1,4 @@
-package zelgius.com.networking
+package zelgius.com.shared
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -10,9 +10,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoJUnitRunner
-import zelgius.com.networking.protocol.CurrentStatus
-import zelgius.com.networking.viewModel.MirrorNetworkViewModel
-import zelgius.com.networking.viewModel.PhoneNetworkViewModel
+import zelgius.com.shared.protocol.CurrentStatus
+import zelgius.com.shared.viewModel.MirrorNetworkViewModel
+import zelgius.com.shared.viewModel.PhoneNetworkViewModel
 import zelgius.com.utils.toHexString
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

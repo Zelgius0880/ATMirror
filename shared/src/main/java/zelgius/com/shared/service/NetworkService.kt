@@ -1,4 +1,4 @@
-package zelgius.com.networking.service
+package zelgius.com.shared.service
 
 import android.app.Service
 import android.content.Context

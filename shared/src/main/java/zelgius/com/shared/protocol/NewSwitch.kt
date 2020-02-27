@@ -1,4 +1,4 @@
-package zelgius.com.networking.protocol
+package zelgius.com.shared.protocol
 
 import zelgius.com.utils.hexStringToByteArray
 import zelgius.com.utils.toHexString

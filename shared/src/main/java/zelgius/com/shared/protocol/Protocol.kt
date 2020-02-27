@@ -1,4 +1,4 @@
-package zelgius.com.networking.protocol
+package zelgius.com.shared.protocol
 
 import java.lang.IllegalStateException
 import java.nio.ByteBuffer

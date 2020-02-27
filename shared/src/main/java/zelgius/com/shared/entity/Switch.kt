@@ -1,4 +1,4 @@
-package zelgius.com.networking.entity
+package zelgius.com.shared.entity
 
 import zelgius.com.utils.toHexString
 

@@ -1,4 +1,4 @@
-package zelgius.com.networking.protocol
+package zelgius.com.shared.protocol
 
 class GetCurrentStatus(): Protocol(
     Code.GET_CURRENT_STATUS.size){

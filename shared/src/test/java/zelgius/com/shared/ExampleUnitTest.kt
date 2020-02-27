@@ -1,4 +1,4 @@
-package zelgius.com.networking
+package zelgius.com.shared
 
 import org.junit.Test
 

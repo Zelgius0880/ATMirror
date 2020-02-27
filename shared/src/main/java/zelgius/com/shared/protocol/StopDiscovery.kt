@@ -1,4 +1,4 @@
-package zelgius.com.networking.protocol
+package zelgius.com.shared.protocol
 
 class StopDiscovery(): Protocol(
     Code.STOP_DISCOVERY.size){

@@ -1,4 +1,4 @@
-package zelgius.com.networking.viewModel
+package zelgius.com.shared.viewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -6,12 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import zelgius.com.networking.entity.Switch
-import zelgius.com.networking.protocol.CurrentStatus
-import zelgius.com.networking.protocol.GetCurrentStatus
-import zelgius.com.networking.protocol.StartDiscovery
-import zelgius.com.networking.protocol.StopDiscovery
-import zelgius.com.networking.repository.NetworkRepository
+import zelgius.com.shared.entity.Switch
+import zelgius.com.shared.protocol.CurrentStatus
+import zelgius.com.shared.protocol.GetCurrentStatus
+import zelgius.com.shared.protocol.StartDiscovery
+import zelgius.com.shared.protocol.StopDiscovery
+import zelgius.com.shared.repository.NetworkRepository
 
 class PhoneNetworkViewModel(val app: Application) : AndroidViewModel(app){
     private val _status = MutableLiveData<CurrentStatus.Status>(CurrentStatus.Status.NOT_WORKING)

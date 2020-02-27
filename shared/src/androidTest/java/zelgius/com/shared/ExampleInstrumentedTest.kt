@@ -1,4 +1,4 @@
-package zelgius.com.networking
+package zelgius.com.shared
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
