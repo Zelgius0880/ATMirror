@@ -1,2 +1,6 @@
-include ':app', ':testapp', ':shared'
+include ':utils'
+include ':shared'
+include ':mobile'
+include ':lights'
+include ':thing', ':testapp', ':sharedThing'
 rootProject.name='ATMirror'
