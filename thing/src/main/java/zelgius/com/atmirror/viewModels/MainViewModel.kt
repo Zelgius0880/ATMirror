@@ -8,7 +8,7 @@ import android.hardware.SensorManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.drivers.sht21.SHT21SensorDriver
-import zelgius.com.shared.viewModels.SharedMainViewModel
+import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
 import java.util.*
 
 
@@ -44,7 +44,7 @@ class MainViewModel(private val context: Application) : SharedMainViewModel(cont
 
     override fun onSensorChanged(event: SensorEvent) {
         //println("Sensor changed: ${event.sensor.stringType} ${event.values[0]}")
-        val record = sht21Record.value ?: zelgius.com.shared.entities.SensorRecord()
+        val record = sht21Record.value ?: zelgius.com.atmirror.shared.entities.SensorRecord()
         record.stamp = Date().time
         when (event.sensor.type) {
             Sensor.TYPE_AMBIENT_TEMPERATURE -> {

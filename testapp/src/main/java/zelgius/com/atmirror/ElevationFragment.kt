@@ -4,8 +4,7 @@ package zelgius.com.atmirror
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import zelgius.com.atmirror.viewModels.MainViewModel
-import zelgius.com.shared.SharedElevationFragment
-import zelgius.com.utils.ViewModelHelper
+import zelgius.com.atmirror.shared.SharedElevationFragment
 
 /**
  * A simple [Fragment] subclass.

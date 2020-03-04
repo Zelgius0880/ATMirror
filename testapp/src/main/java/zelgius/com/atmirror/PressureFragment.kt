@@ -4,10 +4,9 @@ package zelgius.com.atmirror
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.get
 import zelgius.com.atmirror.viewModels.MainViewModel
-import zelgius.com.shared.SharedPressureFragment
-import zelgius.com.shared.viewModels.SharedMainViewModel
+import zelgius.com.atmirror.shared.SharedPressureFragment
+import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER

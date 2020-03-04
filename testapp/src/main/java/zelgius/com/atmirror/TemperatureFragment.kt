@@ -4,10 +4,9 @@ package zelgius.com.atmirror
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.get
 import zelgius.com.atmirror.viewModels.MainViewModel
-import zelgius.com.shared.SharedTemperatureFragment
-import zelgius.com.shared.viewModels.SharedMainViewModel
+import zelgius.com.atmirror.shared.SharedTemperatureFragment
+import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
 
 
 /**

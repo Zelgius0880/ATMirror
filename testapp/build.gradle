@@ -58,6 +58,8 @@ apply plugin: 'kotlin-kapt'
 
 dependencies {
     implementation project(path: ':utils')
+    implementation project(path: ':sharedThing')
+    implementation project(path: ':lights')
     def lifecycle_version = '2.2.0-alpha01'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])

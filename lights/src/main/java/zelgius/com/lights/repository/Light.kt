@@ -3,11 +3,10 @@ package zelgius.com.lights.repository
 import com.google.gson.annotations.SerializedName
 import zelgius.com.lights.service.HueLightState
 
-interface Light {
+interface ILight {
     val isOn: Boolean
     val name: String
-    val type: String
-    val lightType: Type
+    val type: Type
     val uid: String
     val id: String
 
@@ -24,14 +23,13 @@ data class HueLight(
     @SerializedName("number") override var id: String,
     val state: HueLightState,
     override val name: String,
-    override val type: String,
     @SerializedName("uniqueid") val uniqueId:  String
-) : Light {
+) : ILight {
     override val isOn: Boolean
         get() = state.on?:false
 
-    override val lightType: Light.Type
-        get() = Light.Type.HUE
+    override val type: ILight.Type
+        get() = ILight.Type.HUE
 
     override val uid: String
         get() = uniqueId
@@ -43,16 +41,13 @@ data class LIFXLight(
     val power: String,
     @SerializedName("label") override val name: String,
     val product: Product
-    ) : Light {
+    ) : ILight {
 
-    override val lightType: Light.Type
-        get() = Light.Type.LIFX
+    override val type: ILight.Type
+        get() = ILight.Type.LIFX
 
     override val isOn: Boolean
         get() = power == "on"
-
-    override val type: String
-        get() = product.name
 
     data class Product(
         val name: String,

@@ -57,9 +57,9 @@ android {
 apply plugin: 'kotlin-kapt'
 dependencies {
     implementation project(':shared')
-    implementation project(path: ':shared')
     implementation project(path: ':lights')
     implementation project(path: ':utils')
+    implementation project(path: ':sharedThing')
 
     compileOnly 'com.google.android.things:androidthings:+'
 }

@@ -1,23 +1,21 @@
 package zelgius.com.atmirror.viewModels
 
 import android.app.Application
-import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import khronos.Dates
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import zelgius.com.shared.entities.json.DarkSky
-import zelgius.com.shared.repositories.DarkSkyRepository
-import zelgius.com.shared.viewModels.SharedMainViewModel
-import zelgius.com.shared.worker.DarkSkyWorker
-import zelgius.com.shared.worker.KEY
-import zelgius.com.shared.worker.LATITUDE
-import zelgius.com.shared.worker.LONGITUDE
+import zelgius.com.atmirror.shared.entities.json.DarkSky
+import zelgius.com.atmirror.shared.repositories.DarkSkyRepository
+import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
+import zelgius.com.atmirror.shared.worker.DarkSkyWorker
+import zelgius.com.atmirror.shared.worker.KEY
+import zelgius.com.atmirror.shared.worker.LATITUDE
+import zelgius.com.atmirror.shared.worker.LONGITUDE
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
@@ -46,7 +44,7 @@ class MainViewModel(private val context: Application) : SharedMainViewModel(cont
         workerStatus = WorkManager.getInstance().getWorkInfosByTagLiveData("darkSkyRequest")
     }
 
-    override fun updateLastKnownRecord(data: zelgius.com.shared.entities.SensorRecord): Boolean {
+    override fun updateLastKnownRecord(data: zelgius.com.atmirror.shared.entities.SensorRecord): Boolean {
         if (data.stamp > lastKnownRecord.stamp) {
 
             val old = LocalDateTime.ofInstant(

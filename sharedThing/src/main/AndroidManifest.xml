@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="zelgius.com.shared">
+          package="zelgius.com.atmirror.shared">
 
     <application
             android:allowBackup="true"
@@ -9,7 +9,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
 
-        <activity android:name=".SharedMainActivity"
+        <activity android:name="zelgius.com.atmirror.shared.SharedMainActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
 
     </application>

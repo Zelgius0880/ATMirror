@@ -1,17 +1,16 @@
 package zelgius.com.atmirror
 
 import android.os.Bundle
-import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.get
 import zelgius.com.atmirror.viewModels.MainViewModel
-import zelgius.com.shared.SharedMainActivity
-import zelgius.com.shared.viewModels.SharedMainViewModel
+import zelgius.com.atmirror.shared.SharedMainActivity
+import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
+import zelgius.com.utils.ViewModelHelper
 
 
 private val TAG = MainActivity::class.java.simpleName
 
 class MainActivity : SharedMainActivity() {
-    override val viewModel by lazy { ViewModelProviders.of(this).get<MainViewModel>() }
+    override val viewModel by lazy { ViewModelHelper.create<MainViewModel>(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

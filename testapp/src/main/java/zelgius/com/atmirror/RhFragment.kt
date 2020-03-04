@@ -4,11 +4,10 @@ package zelgius.com.atmirror
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.get
 import zelgius.com.atmirror.viewModels.MainViewModel
-import zelgius.com.shared.SharedPressureFragment
-import zelgius.com.shared.SharedRhFragment
-import zelgius.com.shared.viewModels.SharedMainViewModel
+import zelgius.com.atmirror.shared.SharedPressureFragment
+import zelgius.com.atmirror.shared.SharedRhFragment
+import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
 
 /**
  * A simple [Fragment] subclass.
