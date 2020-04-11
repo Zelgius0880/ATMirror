@@ -7,21 +7,20 @@ import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.Observer
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import com.google.firebase.firestore.FirebaseFirestore
-import junit.framework.Assert.*
+import junit.framework.TestCase.*
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import zelgius.com.atmirror.shared.entity.Group
+import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.repository.GroupRepository
 import zelgius.com.lights.repository.ILight
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
@@ -32,7 +31,7 @@ class GroupRepositoryTest {
 
     @Before
     fun initialize() {
-        FirebaseFirestore.setLoggingEnabled(true)
+        //FirebaseFirestore.setLoggingEnabled(true)
     }
 
     @Test
@@ -53,7 +52,10 @@ class GroupRepositoryTest {
             g.name += " Updated"
             repository.createOrUpdate(g, lights = g.lights.subList(0,2))
 
-            g.lights = g.lights.subList(0,2)
+            val subList = g.lights.subList(0,2)
+            g.items = g.items.filter {
+                it.itemType == GroupItem.ItemType.SWITCH || subList.contains(it)
+            }
             repository.getGroup(g.key!!).apply {
                 assertEquals(this, g)
             }
@@ -95,7 +97,7 @@ class GroupRepositoryTest {
         val latch = CountDownLatch(1)
 
 
-        val observer = TestObserver<PagedList<Group>>() {
+        val observer = TestObserver<PagedList<Group>> {
             if (!it.isEmpty()) {
                 assertEquals(5, it.size)
                 assertTrue(groups.containsAll(it))
@@ -108,7 +110,7 @@ class GroupRepositoryTest {
             .setEnablePlaceholders(false)
             .setInitialLoadSizeHint(5)
             .setPageSize(5).build()
-        LivePagedListBuilder<Group, Group>(factory, pagedListConfig)
+        LivePagedListBuilder(factory, pagedListConfig)
             .build()
             .observe(observer, observer)
 
@@ -140,13 +142,15 @@ class GroupRepositoryTest {
                     val list = mutableListOf<Any>()
                     forEach {g ->
                         list.add(g)
-                        g.switches.forEach {s ->
-                            list.add(s)
-                        }
 
                         g.lights.forEach {s ->
                             list.add(s)
                         }
+
+                        g.switches.forEach {s ->
+                            list.add(s)
+                        }
+
                     }
 
                     list.forEachIndexed {i ,item ->
@@ -162,7 +166,7 @@ class GroupRepositoryTest {
             .setEnablePlaceholders(false)
             .setInitialLoadSizeHint(5)
             .setPageSize(5).build()
-        LivePagedListBuilder<Group, Any>(factory, pagedListConfig)
+        LivePagedListBuilder(factory, pagedListConfig)
             .build()
             .observe(observer, observer)
 
@@ -183,14 +187,15 @@ class GroupRepositoryTest {
 
     private fun createSample(name: String = "Test", switches: Int = 3, lights: Int = 3) =
         Group(name).apply {
-            this.switches = (1..switches).map {
+
+            val s = (1..switches).map {
                 Switch(
                     name = "Switch $name $it",
                     uid = UUID.randomUUID().toString()
                 )
             }
 
-            this.lights = (1..switches).map {
+            val l = (1..lights).map {
                 Light(
                     name = "Light $name $it",
                     uid = UUID.randomUUID().toString(),
@@ -198,6 +203,8 @@ class GroupRepositoryTest {
                 ).apply {
                 }
             }
+
+            items = listOf(*s.toTypedArray(), *l.toTypedArray())
         }
 
 

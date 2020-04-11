@@ -2,7 +2,9 @@ package zelgius.com.atmirror.shared.repository
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.isActive
 import zelgius.com.atmirror.shared.entity.FirebaseObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -10,7 +12,7 @@ import kotlin.coroutines.suspendCoroutine
 
 
 open class FirebaseRepository {
-    private val db = FirebaseFirestore.getInstance()
+    protected val db = FirebaseFirestore.getInstance()
 
     init {
     }
@@ -33,12 +35,12 @@ open class FirebaseRepository {
     ) =
         suspendCoroutine<List<T>> { continuation ->
             db.collection(path)
-                .startAt(snapshot)
                 .let {
                     if (order != null) {
                         it.orderBy(order)
                     } else it
                 }
+                .startAfter(snapshot)
                 .limit(size)
                 .addSnapshotListener { snapshots, e ->
                     if (e != null) {
@@ -53,7 +55,8 @@ open class FirebaseRepository {
                             }
                         }
 
-                        continuation.resume(list)
+                        if(continuation.context.isActive)
+                            continuation.resume(list)
                     }
                 }
         }
@@ -81,16 +84,16 @@ open class FirebaseRepository {
                     } else it
                 }
                 .get()
-                .addOnSuccessListener{
-                       /* val list: MutableList<T> = //snapshots.toObjects(objClass)
-                        ArrayList()
-                        for (doc in snapshots.documents) {
-                            doc.toObject(objClass)?.apply {
-                                list.add(this)
-                            }
-                        }
+                .addOnSuccessListener {
+                    /* val list: MutableList<T> = //snapshots.toObjects(objClass)
+                     ArrayList()
+                     for (doc in snapshots.documents) {
+                         doc.toObject(objClass)?.apply {
+                             list.add(this)
+                         }
+                     }
 
-                        continuation.resume(list)*/
+                     continuation.resume(list)*/
                     continuation.resume(it.toObjects(objClass))
                 }
                 .addOnFailureListener {
@@ -121,16 +124,22 @@ open class FirebaseRepository {
     protected suspend fun getSubListSnapshot(
         parent: FirebaseObject,
         path: String,
-        order: String? = null
+        vararg order: String
     ): QuerySnapshot =
         suspendCoroutine { continuation ->
             db.collection(parent.firebasePath)
                 .document(parent.key!!)
                 .collection(path.replace("${parent.firebasePath}/", ""))
                 .run {
-                    if (order != null) {
-                        orderBy(order)
-                    } else this
+                    if(order.isNotEmpty()) {
+                        var query: Query? = null
+                        order.forEach {
+                            query = if(query == null) orderBy(it)
+                            else query!!.orderBy(it)
+                        }
+                        query!!
+                    } else
+                        this
                 }
                 .get()
                 .addOnSuccessListener {
@@ -151,10 +160,10 @@ open class FirebaseRepository {
         parent: FirebaseObject,
         path: String,
         clazz: Class<T>,
-        order: String? = null
+        vararg order: String
     ): List<T> =
         mutableListOf<T>().apply {
-            getSubListSnapshot(parent, path, order).forEach { document ->
+            getSubListSnapshot(parent, path, *order).forEach { document ->
                 document.toObject(clazz).let {
                     it.key = document.id
                     add(it)

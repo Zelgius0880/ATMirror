@@ -1,4 +1,4 @@
-package zelgius.com.mobile
+package zelgius.com.swipetodelete
 
 import org.junit.Test
 

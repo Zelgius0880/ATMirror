@@ -16,17 +16,19 @@ data class Light(
     override var type: ILight.Type,
     @get:Exclude
     @set:Exclude
-    var state: State = State.TOGGLE
-) : ILight, FirebaseObject {
-    constructor() : this(name = "", uid = "", type = ILight.Type.HUE)
-
-    @get:DocumentId
-    @set:DocumentId
-    override var key: String? = null
+    var state: State = State.TOGGLE,
 
     @get:Exclude
     @set:Exclude
-    var group: Group? = null
+    public override  var group: Group? = null,
+    @get:DocumentId
+    @set:DocumentId
+    override var key: String? = null
+) : ILight, GroupItem(uid, ItemType.LIGHT) {
+    constructor() : this(name = "", uid = "", type = ILight.Type.HUE)
+
+
+
 
     @get:Exclude
     override val firebasePath
@@ -59,7 +61,37 @@ data class Light(
         ON, OFF, TOGGLE
     }
 
-    companion object {
-        const val FIREBASE_PATH = "lights"
+
+
+    override fun toString(): String {
+        return "Light(name='$name', uid='$uid', id='$id', type=$type, state=$state, key=$key)"
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Light
+
+        if (name != other.name) return false
+        if (uid != other.uid) return false
+        if (id != other.id) return false
+        if (type != other.type) return false
+        if (state != other.state) return false
+        if (key != other.key) return false
+
+        return group?.key == other.key
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + uid.hashCode()
+        result = 31 * result + id.hashCode()
+        result = 31 * result + type.hashCode()
+        result = 31 * result + state.hashCode()
+        result = 31 * result + (key?.hashCode() ?: 0)
+        return result
+    }
+
+
 }

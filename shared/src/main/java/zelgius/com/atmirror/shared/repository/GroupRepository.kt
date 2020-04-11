@@ -1,12 +1,14 @@
 package zelgius.com.atmirror.shared.repository
 
 import androidx.paging.ItemKeyedDataSource
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import zelgius.com.atmirror.shared.entity.Group
+import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.lights.repository.ILight
@@ -33,9 +35,7 @@ class GroupRepository : FirebaseRepository() {
                 )
             }.apply {
                 forEach { g ->
-                    g.switches = getSwitches(g)
-
-                    g.lights = getLights(g)
+                    g.items = getItems(g)
                 }
             }
 
@@ -54,7 +54,7 @@ class GroupRepository : FirebaseRepository() {
     private suspend fun getSwitches(g: Group) =
         getSublist(
             g,
-            Switch.FIREBASE_PATH,
+            GroupItem.FIREBASE_PATH,
             Switch::class.java,
             "name"
         ).apply {
@@ -63,17 +63,16 @@ class GroupRepository : FirebaseRepository() {
             }
         }
 
-    private suspend fun getLights(g: Group) =
-        getSublist(
-            g,
-            Light.FIREBASE_PATH,
-            Light::class.java,
-            "name"
-        ).apply {
-            forEach {
-                it.group = g
+    suspend fun getItems(g: Group) =
+        getSubListSnapshot(g, GroupItem.FIREBASE_PATH, "itemType", "name")
+            .map {
+                FirestoreGroupItemMapper.map(it).apply {
+                    when(this) {
+                        is Switch -> group = g
+                        is Light -> group = g
+                    }
+                }
             }
-        }
 
 
     /**
@@ -83,7 +82,8 @@ class GroupRepository : FirebaseRepository() {
      * @param callback LoadCallback<Group>
      */
     suspend fun getPagedGroupFlatted(
-        group: Group?, size: Int,
+        group: Group?,
+        size: Int,
         callback: ItemKeyedDataSource.LoadCallback<Any>
     ) {
         withContext(Dispatchers.Default) {
@@ -102,13 +102,7 @@ class GroupRepository : FirebaseRepository() {
             val result = mutableListOf<Any>()
             list.forEach { g ->
                 result.add(g)
-                g.switches = getSwitches(g).apply {
-                    forEach {
-                        result.add(it)
-                    }
-                }
-
-                g.lights = getLights(g).apply {
+                g.items = getItems(g).apply {
                     forEach {
                         result.add(it)
                     }
@@ -128,9 +122,7 @@ class GroupRepository : FirebaseRepository() {
             getSnapshot(key, "groups").run {
                 toObject(Group::class.java)?.also {
                     it.key = id
-                    it.lights = getLights(it)
-
-                    it.switches = getSwitches(it)
+                    it.items = getItems(it)
                 }
             }
         }
@@ -183,8 +175,16 @@ class GroupRepository : FirebaseRepository() {
             }
         }
 
+    suspend fun delete(item: GroupItem) {
+        delete(item, item.firebasePath)
+    }
 
-    @TestOnly // Deleting from android is not recommended
+    suspend fun createOrUpdate(item: GroupItem) {
+        createOrUpdate(item, item.firebasePath)
+    }
+
+
+    @TestOnly // Deleting collections from android is not recommended
     suspend fun delete(group: Group) =
         withContext(Dispatchers.Default) {
             group.lights.forEach {
@@ -202,4 +202,13 @@ class GroupRepository : FirebaseRepository() {
 
     fun getGroupDataSource() = GroupDataSourceFactory()
     fun getFlattedGroupDataSource() = FlattedGroupDataSourceFactory()
+
+    fun getGroupQuery(): Query =
+        db.collection(Group.FIREBASE_PATH).orderBy("name")
+
+    fun getItemsQuery(group: Group): Query =
+        db.collection(Group.FIREBASE_PATH).document(group.key!!).collection(GroupItem.FIREBASE_PATH)
+            .orderBy("itemType")
+            .orderBy("name")
+
 }

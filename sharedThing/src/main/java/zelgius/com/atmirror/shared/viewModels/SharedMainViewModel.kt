@@ -126,7 +126,7 @@ open class SharedMainViewModel(private val context: Application) : AndroidViewMo
                 lastKnownRecord.humidity = data.humidity
 
 
-            if (data.date.toLocalDateTime().hour != old.hour) {// new hour -> saving the record in database
+            if (data.date.time.toLocalDateTime().hour != old.hour) {// new hour -> saving the record in database
                 viewModelScope.launch {
                     databaseService.insertRecord(lastKnownRecord)
                     history.postValue(databaseService.blockingGetSensorDataHistory(from = Dates.yesterday).asReversed())

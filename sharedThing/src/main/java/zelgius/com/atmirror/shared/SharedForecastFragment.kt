@@ -14,11 +14,12 @@ import kotlinx.android.synthetic.main.fragment_forecast.*
 import kotlinx.android.synthetic.main.layout_forecast.view.*
 import zelgius.com.atmirror.shared.entities.json.DarkSky
 import zelgius.com.atmirror.shared.entities.json.ForecastData
-import zelgius.com.utils.toLocalDateTime
 import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
 import zelgius.com.atmirror.shared.worker.DarkSkyResult
+import zelgius.com.utils.toLocalDateTime
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -41,11 +42,11 @@ abstract class SharedForecastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.forecastLiveData.observe(this, Observer {
+        viewModel.forecastLiveData.observe(viewLifecycleOwner, Observer {
             recyclerView.adapter = ForecastAdapter(it)
         })
 
-        viewModel.workerStatus.observe(this, Observer {list ->
+        viewModel.workerStatus.observe(viewLifecycleOwner, Observer {list ->
             list.forEach {
                 textView.text =
                     "${SimpleDateFormat("HH:mm", Locale.FRANCE).format(Date())} ${it.state}"
@@ -124,8 +125,8 @@ abstract class SharedForecastFragment : Fragment() {
                 }
             )
 
-            val date = Date(item.time * 1000).toLocalDateTime(ZoneId.of("Europe/Brussels"))
-            val now = Date().toLocalDateTime(ZoneId.of("Europe/Brussels"))
+            val date = (item.time * 1000).toLocalDateTime(ZoneId.of("Europe/Brussels"))
+            val now = LocalDateTime.now(ZoneId.of("Europe/Brussels"))
             itemView.textView.text = if (now.dayOfMonth == date.dayOfMonth) {
                 itemView.context.getString(R.string.today)
             } else {
@@ -149,7 +150,7 @@ abstract class SharedForecastFragment : Fragment() {
                 R.string.forecast_temperature_format,
                 item.temperatureMax,
                 DateTimeFormatter.ofPattern("HH:mm").format(
-                    Date(item.temperatureMaxTime * 1000).toLocalDateTime(
+                    (item.temperatureMaxTime * 1000).toLocalDateTime(
                         ZoneId.of(
                             "Europe/Brussels"
                         )
@@ -161,7 +162,7 @@ abstract class SharedForecastFragment : Fragment() {
                 R.string.forecast_temperature_format,
                 item.temperatureMin,
                 DateTimeFormatter.ofPattern("HH:mm").format(
-                    Date(item.temperatureMinTime * 1000).toLocalDateTime(
+                    (item.temperatureMinTime * 1000).toLocalDateTime(
                         ZoneId.of(
                             "Europe/Brussels"
                         )

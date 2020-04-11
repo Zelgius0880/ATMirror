@@ -7,26 +7,26 @@ import zelgius.com.utils.toHexString
 
 @IgnoreExtraProperties
 data class Switch (
-    val uid: String,
-    var name: String = ""
+    override val uid: String,
+    var name: String = "",
 
-): FirebaseObject {
-
-    constructor() : this("")
+    @get:Exclude
+    @set:Exclude
+    public override var group: Group? = null,
 
     @get:DocumentId
     @set:DocumentId
     override var key: String? = null
+): GroupItem(uid, ItemType.SWITCH) {
+
+    constructor() : this("")
+
 
     @get:Exclude
     override val firebasePath
         get() = if (group != null) {
             String.format("${Group.FIREBASE_PATH}/${group!!.key!!}/${FIREBASE_PATH}")
         } else FIREBASE_PATH
-
-    @get:Exclude
-    @set:Exclude
-    var group: Group? =null
 
     constructor(
                  uid: ByteArray,
@@ -48,7 +48,9 @@ data class Switch (
         return result
     }
 
-    companion object {
-        const val FIREBASE_PATH = "switches"
+    override fun toString(): String {
+        return "Switch(uid='$uid', name='$name', key=$key)"
     }
+
+
 }

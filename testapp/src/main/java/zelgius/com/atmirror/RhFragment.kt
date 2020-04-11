@@ -3,11 +3,11 @@ package zelgius.com.atmirror
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import zelgius.com.atmirror.viewModels.MainViewModel
 import zelgius.com.atmirror.shared.SharedPressureFragment
 import zelgius.com.atmirror.shared.SharedRhFragment
 import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
+import zelgius.com.utils.ViewModelHelper
 
 /**
  * A simple [Fragment] subclass.
@@ -16,7 +16,7 @@ import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
  */
 class RhFragment : SharedRhFragment() {
 
-    override val viewModel by lazy { ViewModelProviders.of(activity!!).get<MainViewModel>() }
+    override val viewModel by lazy { ViewModelHelper.create<MainViewModel>(requireActivity())}
 
 
 

@@ -1,21 +1,15 @@
 package zelgius.com.atmirror.viewModels
 
 import android.app.Application
+import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import khronos.Dates
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import zelgius.com.atmirror.shared.entities.json.DarkSky
-import zelgius.com.atmirror.shared.repositories.DarkSkyRepository
+import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
 import zelgius.com.atmirror.shared.worker.DarkSkyWorker
-import zelgius.com.atmirror.shared.worker.KEY
-import zelgius.com.atmirror.shared.worker.LATITUDE
-import zelgius.com.atmirror.shared.worker.LONGITUDE
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime

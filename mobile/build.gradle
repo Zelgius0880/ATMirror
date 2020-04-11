@@ -6,7 +6,7 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        applicationId "zelgius.com.mobile"
+        applicationId "zelgius.com.atmirror.mobile"
         minSdkVersion 27
         targetSdkVersion 29
         versionCode 1
@@ -21,18 +21,27 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}"
+    implementation 'androidx.core:core-ktx:1.3.0-beta01'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation project(path: ':shared')
     implementation project(path: ':lights')
     implementation project(path: ':utils')
-    implementation 'com.google.firebase:firebase-firestore:17.1.2'
+    implementation 'com.google.android.material:material:1.2.0-alpha05'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+    implementation project(path: ':swipeToDelete')
+
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -44,22 +53,23 @@ dependencies {
     // Java language implementation
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"
+    implementation 'androidx.fragment:fragment:1.2.4'
 
     // Kotlin
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
-    //Firebase
-    implementation 'com.google.firebase:firebase-storage:19.1.1'
-
 //Paging Library
-    def paging_version = "2.1.1"
-    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+    def paging_version = "2.1.2"
+    //implementation "androidx.paging:paging-runtime-ktx:$paging_version"
 
 
     // alternatively - without Android dependencies for testing
     testImplementation "androidx.paging:paging-common:$paging_version"
     // For Kotlin use paging-common-ktx
+
+    // FirebaseUI for Cloud Firestore
+    //implementation 'com.firebaseui:firebase-ui-firestore:6.2.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -2,21 +2,28 @@ package zelgius.com.utils
 
 import android.content.Context
 import java.time.ZoneId
-import java.util.*
 import kotlin.math.round
 import android.graphics.Color
+import android.util.TypedValue
+import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import java.time.Instant
+import java.time.LocalDateTime
+import java.util.*
 import kotlin.experimental.and
 import kotlin.math.roundToInt
 
+fun Long.toLocalDateTime() =
+    LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(this),
+        TimeZone.getDefault().toZoneId());
 
-fun Date.toLocalDateTime() =
-    this.toInstant().atZone(ZoneId.systemDefault())
-        .toLocalDateTime()!!
-
-fun Date.toLocalDateTime(timeZone: ZoneId) =
-    this.toInstant().atZone(timeZone)
-        .toLocalDateTime()!!
+fun Long.toLocalDateTime(zone: ZoneId) =
+    LocalDateTime.ofInstant(Instant.ofEpochMilli(this),zone);
 
 fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
@@ -62,3 +69,34 @@ fun String.hexStringToByteArray() : ByteArray {
     return result
 }
 
+/**
+ *
+ * Get the value of dp to Pixel according to density of the screen
+ *
+ * @receiver Context
+ * @param dp Float      the value in dp
+ * @return the value of dp to Pixel according to density of the screen
+ */
+fun Context.dpToPx(dp: Float) =
+    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics)
+
+fun <T> LiveData<T>.observe(lifecycleOwner: LifecycleOwner, work: (T) -> Unit) {
+    observe(lifecycleOwner, Observer {
+        work(it)
+    })
+}
+
+fun AlertDialog.setListeners(positiveListener: (() -> Boolean)? = null, negativeListener: (() -> Boolean)? = null) {
+
+    setOnShowListener {
+        getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            if (positiveListener == null) dismiss()
+            else if (positiveListener()) dismiss()
+        }
+
+        getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+            if (negativeListener == null) dismiss()
+            else if (negativeListener()) dismiss()
+        }
+    }
+}

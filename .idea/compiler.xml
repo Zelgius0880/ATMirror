@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="ATMirror.lights" target="1.7" />
+      <module name="ATMirror.mobile" target="1.7" />
+      <module name="ATMirror.shared" target="1.7" />
+      <module name="ATMirror.sharedThing" target="1.8" />
+      <module name="ATMirror.swipeToDelete" target="1.7" />
+      <module name="ATMirror.testapp" target="1.8" />
+      <module name="ATMirror.thing" target="1.8" />
+      <module name="ATMirror.utils" target="1.7" />
+      <module name="lights" target="1.7" />
+      <module name="mobile" target="1.7" />
+      <module name="shared" target="1.7" />
+      <module name="sharedThing" target="1.8" />
+      <module name="swipeToDelete" target="1.7" />
+      <module name="testapp" target="1.8" />
+      <module name="thing" target="1.8" />
+      <module name="utils" target="1.7" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

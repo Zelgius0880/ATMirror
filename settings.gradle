@@ -1,3 +1,4 @@
+include ':swipeToDelete'
 include ':utils'
 include ':shared'
 include ':mobile'
