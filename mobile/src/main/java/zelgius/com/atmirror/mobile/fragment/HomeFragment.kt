@@ -19,12 +19,6 @@ import zelgius.com.utils.observe
 
 class HomeFragment : Fragment() {
 
-    private val networkViewModel by lazy {
-        ViewModelHelper.create<PhoneNetworkViewModel>(
-            requireActivity()
-        )
-    }
-
     private val editViewModel by lazy {
         ViewModelHelper.create<EditViewModel>(
             requireActivity()
@@ -71,10 +65,6 @@ class HomeFragment : Fragment() {
         homeViewModel.getGroups().observe(this) {
             binding.progressBar.visibility = View.GONE
             adapter.submitList(it)
-        }
-
-        networkViewModel.status.observe(this) {
-            lastKnownStatus = it
         }
     }
 

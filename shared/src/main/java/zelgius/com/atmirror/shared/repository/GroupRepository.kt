@@ -3,15 +3,12 @@ package zelgius.com.atmirror.shared.repository
 import androidx.paging.ItemKeyedDataSource
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import zelgius.com.atmirror.shared.entity.Group
 import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
-import zelgius.com.lights.repository.ILight
 
 class GroupRepository : FirebaseRepository() {
 
@@ -179,8 +176,8 @@ class GroupRepository : FirebaseRepository() {
         delete(item, item.firebasePath)
     }
 
-    suspend fun createOrUpdate(item: GroupItem) {
-        createOrUpdate(item, item.firebasePath)
+    suspend fun createOrUpdate(item: GroupItem, checkUnique: Boolean = false) {
+        createOrUpdate(item, item.firebasePath, if(checkUnique) "uid" to item.uid else null)
     }
 
 

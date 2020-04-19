@@ -32,7 +32,7 @@ data class Switch (
                  uid: ByteArray,
                  name: String = "",
                  group: Group? = null
-    ) : this (uid.toHexString(), name)
+    ) : this (removeDuplicateEntries(uid).toHexString(), name)
 
 
     override fun equals(other: Any?): Boolean {
@@ -53,4 +53,28 @@ data class Switch (
     }
 
 
+    companion object {
+        private fun removeDuplicateEntries(array: ByteArray): ByteArray {
+            var repeating =
+                false // will be true if dividing the array by divider will give the same subsequence
+            // ex: [abcabcabc] -> [abc] [abc] [abc]
+
+            var divider = 1
+
+            do {
+                ++divider
+                if (array.size % divider == 0) {
+                    for (i in 0 until array.size / divider) {
+                        for (j in 1 until divider) {
+                            repeating = array[i] == array[j * array.size / divider + i]
+                        }
+                    }
+                }
+            } while (divider != array.size && !repeating)
+
+            return if (repeating)
+                array.sliceArray(0 until array.size / divider)
+            else array
+        }
+    }
 }

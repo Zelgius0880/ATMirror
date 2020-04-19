@@ -7,15 +7,19 @@ import com.google.android.things.pio.UartDevice
 import com.google.android.things.pio.UartDeviceCallback
 import zelgius.com.atmirror.viewModels.MainViewModel
 import zelgius.com.atmirror.shared.SharedMainActivity
+import zelgius.com.atmirror.shared.viewModel.MirrorNetworkViewModel
+import zelgius.com.utils.ViewModelHelper
 import zelgius.com.utils.toHexString
 import java.io.IOException
+import java.nio.ByteBuffer
 
 
 private val TAG = MainActivity::class.java.simpleName
 private val UART_DEVICE_NAME: String = "UART0"
 
 class MainActivity : SharedMainActivity() {
-    override val viewModel by lazy { zelgius.com.utils.ViewModelHelper.create<MainViewModel>(this) }
+    override val viewModel by lazy { ViewModelHelper.create<MainViewModel>(this) }
+    private lateinit var networkViewModel : MirrorNetworkViewModel
 
     private var mDevice: UartDevice? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +37,9 @@ class MainActivity : SharedMainActivity() {
         mDevice?.let {
             configureUartFrame(it)
         }
+
+        networkViewModel =  ViewModelHelper.create(this)
+
     }
 
     @Throws(IOException::class)
@@ -47,26 +54,28 @@ class MainActivity : SharedMainActivity() {
     }
 
     @Throws(IOException::class)
-    fun readUartBuffer(uart: UartDevice) {
+    fun readUartBuffer(uart: UartDevice) =
         // Maximum amount of data to read at one time
-        val maxCount = 256
-
-        uart.apply {
-            ByteArray(maxCount).also { buffer ->
+        uart.run {
+            val maxCount = 256
+            val result = ByteBuffer.allocate(256)
+            ByteArray(maxCount).let { buffer ->
                 var count: Int = read(buffer, buffer.size)
                 while (count > 0) {
+                    result.put(buffer, 0, count)
                     Log.d(TAG, "Read $count bytes from peripheral")
                     //Log.d(TAG, buffer.toHexString())
-                    Log.d(TAG, String(buffer))
+                    //Log.d(TAG, String(buffer))
                     count = read(buffer, buffer.size)
 
                 }
 
-                Log.d(TAG, String(buffer))
-
+                Log.d(TAG, result.array().toHexString())
+                result.array().slice(0 until result.position()).toByteArray()
             }
+
         }
-    }
+
 
 
 
@@ -86,7 +95,7 @@ class MainActivity : SharedMainActivity() {
         override fun onUartDeviceDataAvailable(uart: UartDevice): Boolean {
             // Read available data from the UART device
             try {
-                readUartBuffer(uart)
+                networkViewModel.switchPressed(readUartBuffer(uart))
             } catch (e: IOException) {
                 Log.w(TAG, "Unable to access UART device", e)
             }

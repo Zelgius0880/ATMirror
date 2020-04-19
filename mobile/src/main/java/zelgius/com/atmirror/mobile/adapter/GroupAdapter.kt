@@ -9,9 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.databinding.*
-import zelgius.com.atmirror.shared.entity.Group
-import zelgius.com.atmirror.shared.entity.Light
-import zelgius.com.atmirror.shared.entity.Switch
+import zelgius.com.atmirror.shared.entity.*
 import zelgius.com.swipetodelete.SwipeToDeletePagedAdapter
 
 class GroupAdapter(private val editListener: (Group) -> Unit) :
@@ -134,9 +132,9 @@ class GroupAdapter(private val editListener: (Group) -> Unit) :
         val DIFF_UTIL = object : DiffUtil.ItemCallback<Any>() {
             override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean =
                 when(oldItem) {
-                    is Switch -> (newItem as Switch).key == oldItem.key
-                    is Group -> (newItem as Group).key == oldItem.key
-                    is Light -> (newItem as Light).key == oldItem.key
+                    is Switch -> (newItem as FirebaseObject).key == oldItem.key
+                    is Group -> (newItem as FirebaseObject).key == oldItem.key
+                    is Light -> (newItem as FirebaseObject).key == oldItem.key
                     else -> false
                 }
 

@@ -8,7 +8,8 @@ class CurrentStatus: Protocol {
 
     enum class Status(val code: Byte) {
         NOT_WORKING(0x00),
-        SWITCH_DISCOVERING(0x01)
+        SWITCH_DISCOVERING(0x01),
+        UNKOWN(0xFF.toByte())
     }
 
     val status: Status

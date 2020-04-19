@@ -21,11 +21,13 @@ import zelgius.com.utils.dpToPx
 
 class EditGroupAdapter(
     options: FirestorePagingOptions<GroupItem>,
-    val itemChangedListener: (GroupItem) -> Unit
+    val itemChangedListener: (GroupItem) -> Unit,
+    val itemRemovedListener: (GroupItem) -> Unit
 ) :
     SwipeToDeleteFirestorePagedAdapter<GroupItem, EditGroupAdapter.BindableViewHolder<*>>(
         GroupItem::class.java,
-        options
+        options,
+        deleteListener =  itemRemovedListener
     ) {
 
     override fun getItemViewType(position: Int): Int =
@@ -69,6 +71,10 @@ class EditGroupAdapter(
             }
         }
 
+    }
+
+    override fun getData(position: Int): GroupItem? {
+        return FirestoreGroupItemMapper.map(getItem(position)!!)
     }
 
     inner class SwitchViewHolder(private val binder: AdapterSwitchBinding) :

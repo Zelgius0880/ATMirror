@@ -1,14 +1,16 @@
 package zelgius.com.atmirror.mobile.viewModel
+
 import android.app.Application
+import androidx.annotation.BoolRes
 import androidx.lifecycle.*
 import androidx.paging.PagedList
-import androidx.paging.toLiveData
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.entity.Group
 import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
+import zelgius.com.atmirror.shared.repository.FirebaseRepository
 import zelgius.com.atmirror.shared.repository.FirestoreGroupItemMapper
 import zelgius.com.atmirror.shared.repository.GroupRepository
 
@@ -61,19 +63,42 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
         return liveData
     }
 
-    fun save(item: GroupItem): LiveData<Boolean>  {
+    fun delete(item: GroupItem): LiveData<Boolean> {
+        val liveData = MutableLiveData<Boolean>()
+        viewModelScope.launch {
+            groupRepository.delete(
+                when (item) {
+                    is Switch -> item.copy(group = editingGroup)
+                    is Light -> item.copy(group = editingGroup)
+                    else -> error("Should not be there")
+                }
+            )
+            liveData.postValue(true)
+        }
+
+        return liveData
+    }
+
+    fun save(item: GroupItem, update: Boolean = false): LiveData<Boolean> {
         //_progress.value = true
         val liveData = MutableLiveData<Boolean>()
 
         viewModelScope.launch {
+            try {
+                if (item is Light)
+                    groupRepository.createOrUpdate(item.copy(group = editingGroup), !update)
+                else
+                    groupRepository.createOrUpdate(
+                        (item as Switch).copy(group = editingGroup),
+                        true
+                    )
 
-            if(item is Light)
-                groupRepository.createOrUpdate(item.copy(group = editingGroup))
-            else
-                groupRepository.createOrUpdate((item as Switch).copy(group = editingGroup))
-
-            liveData.value = true
-            //_progress.value = false
+                liveData.value = true
+                //_progress.value = false
+            } catch (e: FirebaseRepository.AlreadyExistsException) {
+                e.printStackTrace()
+                liveData.value = false
+            }
         }
 
         return liveData

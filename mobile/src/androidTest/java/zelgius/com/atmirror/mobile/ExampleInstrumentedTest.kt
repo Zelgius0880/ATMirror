@@ -13,6 +13,7 @@ import zelgius.com.atmirror.shared.entity.Group
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.lights.repository.ILight
+import java.net.InetAddress
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -28,9 +29,11 @@ class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
         // Context of the app under test.
-        val g = createSample()
 
-        assertEquals(g.copy(), g)
+        InetAddress.getByName("AtMirror").apply {
+            assertEquals("192.168.1.11", hostAddress)
+        }
+
     }
 
     private fun createSample(name: String = "Test", switches: Int = 3, lights: Int = 3) =

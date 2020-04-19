@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.protocol.CurrentStatus
@@ -12,59 +13,37 @@ import zelgius.com.atmirror.shared.protocol.GetCurrentStatus
 import zelgius.com.atmirror.shared.protocol.StartDiscovery
 import zelgius.com.atmirror.shared.protocol.StopDiscovery
 import zelgius.com.atmirror.shared.repository.NetworkRepository
+import zelgius.com.atmirror.shared.repository.State
 
-class PhoneNetworkViewModel(val app: Application) : AndroidViewModel(app){
-    private val _status = MutableLiveData<CurrentStatus.Status>(CurrentStatus.Status.NOT_WORKING)
-    val status: LiveData<CurrentStatus.Status>
+class PhoneNetworkViewModel(val app: Application) : AndroidViewModel(app) {
+    private val _status = MutableLiveData(State.NOT_WORKING)
+    val status: LiveData<State>
         get() = _status
 
-    private val switchList = mutableListOf<Switch>()
-    private val _switches = MutableLiveData<List<Switch>>(switchList)
-    val switches: LiveData<List<Switch>>
-    get() = _switches
+    private val _switch = MutableLiveData<Switch?>()
+    val switch: LiveData<Switch?>
+        get() = _switch
 
-    private val repository = NetworkRepository(app) .apply{
-        startDiscoveryListener = {
-           error("Cannot do that ${it.code.name}")
-        }
-
-        stopDiscoveryListener = {
-            error("Cannot do that ${it.code.name}")
-        }
-
-        getCurrentStatusListener = {
-            error("Cannot do that ${it.code.name}")
-        }
-
-        currentStatusListener = {
-            _status.postValue(it.status)
-        }
-
+    private val repository = NetworkRepository(
+        mirrorStateChangedListener = {
+            _status.postValue(it)
+        },
         switchListener = {
-            Switch(it.uid).let { s ->
-                if(!switchList.contains(s)) {
-                    switchList.add(s)
-                    _switches.postValue(switchList)
-                }
-            }
+            _switch.postValue(it?.copy(key = null))
         }
-    }
-
-    init {
-        repository.bind()
-    }
+    )
 
     override fun onCleared() {
         super.onCleared()
-
-        repository.unbind()
+        repository.removeListeners()
     }
 
     fun startDiscovery(): LiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
 
-        viewModelScope.launch {
-            result.postValue(repository.sendMessage(StartDiscovery(), true))
+        viewModelScope.launch(CoroutineExceptionHandler { _, e -> throw  e }) {
+            repository.startDiscovery()
+            result.postValue(true)
         }
 
         return result
@@ -73,18 +52,14 @@ class PhoneNetworkViewModel(val app: Application) : AndroidViewModel(app){
 
     fun stopDiscovery(): LiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
+        _switch.value = Switch()
 
-        viewModelScope.launch {
-            result.postValue(repository.sendMessage(StopDiscovery(), true))
+        viewModelScope.launch(CoroutineExceptionHandler { _, e -> throw  e }) {
+            repository.stopDiscovery()
+            result.postValue(true)
         }
 
         return result
     }
 
-
-    fun getCurrentStatus() {
-        viewModelScope.launch {
-            repository.sendMessage(GetCurrentStatus(), true)
-        }
-    }
 }

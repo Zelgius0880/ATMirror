@@ -5,12 +5,14 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_edit.view.*
+import zelgius.com.atmirror.mobile.AddSwitchDialog
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.EditGroupAdapter
 import zelgius.com.atmirror.mobile.databinding.FragmentEditBinding
 import zelgius.com.atmirror.mobile.hideKeyboard
 import zelgius.com.atmirror.mobile.text
 import zelgius.com.atmirror.mobile.viewModel.EditViewModel
+import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.utils.ViewModelHelper
 import zelgius.com.utils.observe
 
@@ -43,23 +45,32 @@ class EditFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter =  EditGroupAdapter( editViewModel.getItems()) {
-            editViewModel.save(it).observe(this@EditFragment) {
-                Snackbar.make(binding.root, R.string.name_save, Snackbar.LENGTH_SHORT)
-                    .show()
+        adapter = EditGroupAdapter(
+            editViewModel.getItems(),
+            itemChangedListener = {
+                editViewModel.save(it, true).observe(this@EditFragment) {
+                    Snackbar.make(binding.root, R.string.item_saved, Snackbar.LENGTH_SHORT)
+                        .show()
 
-                //adapter.refresh()
+                    //adapter.refresh()
+                }
+            },
+            itemRemovedListener = {
+                editViewModel.delete(it).observe(this) {_ ->
+                    adapter.refresh()
+                    showUndoSnackBar(it)
+                }
             }
-        }
+        )
 
         binding.recyclerView.adapter = adapter
 
-        editViewModel.group.observe(this){
+        editViewModel.group.observe(this) {
             binding.groupName.editText?.setText(it.name)
         }
 
-        editViewModel.progress.observe(this){
-            if(it) {
+        editViewModel.progress.observe(this) {
+            if (it) {
                 binding.progressBar.visibility = View.VISIBLE
                 binding.saveName.visibility = View.GONE
             } else {
@@ -83,6 +94,37 @@ class EditFragment : Fragment() {
 
         binding.menu.menuLayouts = arrayOf(binding.addLightLayout, binding.addSwitchLayout)
         binding.menu.rotationAnimation = 45f
+        binding.addSwitch.setOnClickListener {
+            AddSwitchDialog().apply {
+                listener = {
+                    editViewModel.save(it).observe(this@EditFragment) { saved ->
+                        if (!saved)
+                            Snackbar.make(
+                                binding.root,
+                                R.string.switch_already_exists,
+                                Snackbar.LENGTH_SHORT
+                            )
+                                .show()
+                        else {
+                            Snackbar.make(binding.root, R.string.item_saved, Snackbar.LENGTH_SHORT)
+                                .show()
+                            adapter.refresh()
+                        }
+                    }
+                }
+            }.show(parentFragmentManager, "add_switch")
+        }
+    }
+
+    private fun showUndoSnackBar(item: GroupItem) {
+        Snackbar.make(binding.root, R.string.item_deleted, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                item.key = null
+                editViewModel.save(item).observe(this) {
+                    adapter.refresh()
+                }
+            }
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -1,113 +1,108 @@
 package zelgius.com.atmirror.shared.repository
 
-import android.app.Application
-import android.content.*
-import android.os.IBinder
-import android.os.Message
-import android.os.Messenger
-import android.os.RemoteException
-import androidx.core.os.bundleOf
-import zelgius.com.atmirror.shared.service.NEW_MESSAGE_RECEIVED
-import zelgius.com.atmirror.shared.service.NetworkService
-import zelgius.com.atmirror.shared.service.SEND_MESSAGE
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.IgnoreExtraProperties
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.ktx.getField
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import zelgius.com.atmirror.shared.entity.FirebaseObject
+import zelgius.com.atmirror.shared.entity.Switch
 
 class NetworkRepository(
-    val application: Application,
-    var switchListener: (zelgius.com.atmirror.shared.protocol.NewSwitch) -> Unit = {},
-    var startDiscoveryListener: (zelgius.com.atmirror.shared.protocol.StartDiscovery) -> Unit = {},
-    var stopDiscoveryListener: (zelgius.com.atmirror.shared.protocol.StopDiscovery) -> Unit = {},
-    var getCurrentStatusListener: (zelgius.com.atmirror.shared.protocol.GetCurrentStatus) -> Unit = {},
-    var currentStatusListener: (zelgius.com.atmirror.shared.protocol.CurrentStatus) -> Unit = {}
+    var switchListener: (Switch?) -> Unit = {},
+    var phoneStateChangedListener: ((State) -> Unit)? = null,
+    var mirrorStateChangedListener: ((State) -> Unit)? = null
 ) {
-    private var service: Messenger? = null
-    private var bound: Boolean = false
 
-    private var ackCallback: ((zelgius.com.atmirror.shared.protocol.Ack) -> Unit)? = null
+    private var phoneListenerRegistration: ListenerRegistration? = null
+    private var mirrorListenerRegistration: ListenerRegistration? = null
+    private var switchListenerRegistration: ListenerRegistration? = null
+    val repository = FirebaseRepository()
 
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                NEW_MESSAGE_RECEIVED -> handleProtocol(zelgius.com.atmirror.shared.protocol.Protocol.parse(intent.getByteArrayExtra("data")!!))
+    private val path = if (mirrorStateChangedListener == null) "mirror" else "phone"
+
+    init {
+        CoroutineScope(Dispatchers.Default).launch {
+            if (mirrorStateChangedListener != null) {
+                setUpMirrorStateListener()
+                setUpSwitchStateListener()
+            } else { // mirror case -> listening the mirror state
+                setUpPhoneStateListener()
             }
         }
     }
 
-    private fun handleProtocol(protocol: zelgius.com.atmirror.shared.protocol.Protocol) {
-        when (protocol.code) {
-            zelgius.com.atmirror.shared.protocol.Protocol.Code.ACK -> ackCallback?.invoke(protocol as zelgius.com.atmirror.shared.protocol.Ack)
-            zelgius.com.atmirror.shared.protocol.Protocol.Code.START_DISCOVERY -> startDiscoveryListener(protocol as zelgius.com.atmirror.shared.protocol.StartDiscovery)
-            zelgius.com.atmirror.shared.protocol.Protocol.Code.NEW_SWITCH -> switchListener(protocol as zelgius.com.atmirror.shared.protocol.NewSwitch)
-            zelgius.com.atmirror.shared.protocol.Protocol.Code.STOP_DISCOVERY -> stopDiscoveryListener(protocol as zelgius.com.atmirror.shared.protocol.StopDiscovery)
-            zelgius.com.atmirror.shared.protocol.Protocol.Code.GET_CURRENT_STATUS -> getCurrentStatusListener(protocol as zelgius.com.atmirror.shared.protocol.GetCurrentStatus)
-            zelgius.com.atmirror.shared.protocol.Protocol.Code.CURRENT_STATUS -> currentStatusListener(protocol as zelgius.com.atmirror.shared.protocol.CurrentStatus)
+     suspend fun startDiscovery() =
+        withContext(Dispatchers.Default) {
+            repository.createOrUpdate(StateElement(key =path, state = State.DISCOVERING), "states")
+        }
+
+    suspend fun stopDiscovery() =
+        withContext(Dispatchers.Default) {
+            repository.createOrUpdate(StateElement(key = path, state = State.NOT_WORKING), "states")
+        }
+
+    suspend fun sendSwitch(switch: Switch?) =
+        withContext(Dispatchers.Default) {
+
+            if(switch != null) {
+                switch.key = "lastKnownSwitch"
+                repository.createOrUpdate(switch, "states")
+            } else
+                repository.delete("lastKnownSwitch", "states")
+        }
+
+    @IgnoreExtraProperties
+    data class StateElement(
+        @get:Exclude
+        override val firebasePath: String = "",
+        @get:Exclude
+        @set:Exclude
+        override var key: String?,
+        val state: State) : FirebaseObject
+
+    fun removeListeners() {
+        phoneListenerRegistration?.remove()
+        mirrorListenerRegistration?.remove()
+        switchListenerRegistration?.remove()
+    }
+
+    private suspend fun setUpPhoneStateListener() {
+        phoneListenerRegistration = repository.listen("phone", "states") { snapshot, exception ->
+            exception?.printStackTrace()
+
+            if (snapshot != null && snapshot.getField<String>("state") != null)
+                phoneStateChangedListener?.invoke(snapshot.getField("state")!!)
         }
     }
 
 
-    private val connection = object : ServiceConnection {
+    private suspend fun setUpMirrorStateListener() {
+        mirrorListenerRegistration = repository.listen("mirror", "states") { snapshot, exception ->
+            exception?.printStackTrace()
 
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // This is called when the connection with the service has been
-            // established, giving us the object we can use to
-            // interact with the service.  We are communicating with the
-            // service using a Messenger, so here we get a client-side
-            // representation of that from the raw IBinder object.
-            this@NetworkRepository.service = Messenger(service)
-            bound = true
-
+            if (snapshot != null && snapshot.getField<String>("state") != null)
+                mirrorStateChangedListener?.invoke(snapshot.getField("state")!!)
         }
 
-        override fun onServiceDisconnected(className: ComponentName) {
-            // This is called when the connection with the service has been
-            // unexpectedly disconnected -- that is, its process crashed.
-            service = null
-            bound = false
-        }
     }
 
-    fun bind() {
-        Intent(application, NetworkService::class.java).also { intent ->
-            application.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        }
+    private suspend fun setUpSwitchStateListener() {
+        mirrorListenerRegistration =
+            repository.listen("lastKnownSwitch", "states") { snapshot, exception ->
+                exception?.printStackTrace()
 
-        application.registerReceiver(receiver, IntentFilter())
-
-        bound = true
-    }
-
-    fun unbind() {
-        if (bound) {
-            application.unbindService(connection)
-            bound = false
-        }
-
-        application.unregisterReceiver(receiver)
-    }
-
-    suspend fun sendMessage(protocol: zelgius.com.atmirror.shared.protocol.Protocol, waitAck: Boolean = false): Boolean {
-        if (!bound) return false
-        // Create and send a message to the service, using a supported 'what' value
-        val msg = Message.obtain(null, SEND_MESSAGE, 0, 0).apply {
-            data = bundleOf("data" to protocol.build())
-        }
-
-        try {
-            service?.send(msg)
-        } catch (e: RemoteException) {
-            e.printStackTrace()
-        }
-
-        return if (waitAck) {
-            suspendCoroutine { cont ->
-                ackCallback = {
-                    cont.resume(it.ackOk)
-                    ackCallback = null
+                if (snapshot != null) {
+                    val switch = snapshot.toObject(Switch::class.java)
+                        switchListener.invoke(if(snapshot.exists() && !snapshot.metadata.isFromCache) switch else null)
                 }
             }
-        } else {
-            true
-        }
+
     }
+
+
 }
+

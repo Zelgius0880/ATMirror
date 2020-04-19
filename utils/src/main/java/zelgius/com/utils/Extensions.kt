@@ -1,11 +1,8 @@
 package zelgius.com.utils
 
 import android.content.Context
-import java.time.ZoneId
-import kotlin.math.round
 import android.graphics.Color
 import android.util.TypedValue
-import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleOwner
@@ -13,8 +10,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
-import kotlin.experimental.and
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 fun Long.toLocalDateTime() =
@@ -42,15 +40,9 @@ fun Context.getColor(@ColorRes color: Int, alpha: Float) =
 
 
 fun ByteArray.toHexString(): String {
-    val hexArray = "0123456789ABCDEF".toCharArray()
-    val hexChars = CharArray(size * 2)
-    for (j in indices) {
-        val v = (this[j] and 0xFF.toByte()).toInt()
-
-        hexChars[j * 2] = hexArray[v ushr 4]
-        hexChars[j * 2 + 1] = hexArray[v and 0x0F]
-    }
-    return String(hexChars)
+    val sb = StringBuilder(size * 2)
+    forEach { sb.append(String.format("%02x", it)) }
+    return sb.toString()
 }
 
 
@@ -86,7 +78,7 @@ fun <T> LiveData<T>.observe(lifecycleOwner: LifecycleOwner, work: (T) -> Unit) {
     })
 }
 
-fun AlertDialog.setListeners(positiveListener: (() -> Boolean)? = null, negativeListener: (() -> Boolean)? = null) {
+fun AlertDialog.setListeners(positiveListener: (() -> Boolean)? = null, negativeListener: (() -> Boolean)? = null): AlertDialog {
 
     setOnShowListener {
         getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
@@ -99,4 +91,6 @@ fun AlertDialog.setListeners(positiveListener: (() -> Boolean)? = null, negative
             else if (negativeListener()) dismiss()
         }
     }
+
+    return this
 }

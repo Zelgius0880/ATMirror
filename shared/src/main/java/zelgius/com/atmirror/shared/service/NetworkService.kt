@@ -1,22 +1,24 @@
 package zelgius.com.atmirror.shared.service
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
+import android.util.Log
+import zelgius.com.utils.Networking
+import zelgius.com.utils.toHexString
 import java.io.IOException
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
-import java.net.MulticastSocket
+import java.lang.Exception
+import java.net.*
+import java.nio.ByteBuffer
 import kotlin.concurrent.thread
 
 
 const val NEW_MESSAGE_RECEIVED = "NEW_MESSAGE_RECEIVED"
 const val SEND_MESSAGE = 123
+const val CLOSE_CONNECTION = 456
 
 class NetworkService : Service() {
     /**
@@ -24,33 +26,26 @@ class NetworkService : Service() {
      */
     private lateinit var messenger: Messenger
     private var stop = false
-    private var socket: MulticastSocket? = null
+    private var socket: Socket? = null
+    var server: Boolean = false
+    var ip: String? = null
 
     /**
      * Handler of incoming messages from clients.
      */
-    internal class IncomingHandler(
-        context: Context,
-        private val applicationContext: Context = context.applicationContext
-    ) : Handler() {
+    internal class IncomingHandler(val listener: (ByteArray) -> Unit) : Handler() {
         override fun handleMessage(msg: Message) {
-            val(what, data) = msg.what to msg.data
+            val (what, data) = msg.what to msg.data
             when (what) {
-                SEND_MESSAGE -> thread { multicast(data.getByteArray("data")!!) }
+                SEND_MESSAGE -> listener(data.getByteArray("data")!!)
+                CLOSE_CONNECTION -> listener(byteArrayOf())
                 else -> super.handleMessage(msg)
             }
-        }
-
-        private fun multicast(bytes: ByteArray) {
-            val socket = DatagramSocket()
-            val group: InetAddress = InetAddress.getByName("230.1.2.3")
-            val packet = DatagramPacket(bytes, bytes.size, group, 4446)
-            socket.send(packet)
-            socket.close()
         }
     }
 
     private fun broadcastData(bytes: ByteArray) {
+        Log.i(NetworkService::class.java.name, "New Message: ${bytes.toHexString()}")
         Intent().also {
             it.action = NEW_MESSAGE_RECEIVED
             it.putExtra("data", bytes)
@@ -63,38 +58,114 @@ class NetworkService : Service() {
      * for sending messages to the service.
      */
     override fun onBind(intent: Intent): IBinder? {
-        messenger = Messenger(IncomingHandler(this))
+        messenger = Messenger(IncomingHandler {
+            if(it.isNotEmpty())
+                send(it)
+            else {
+                close()
+            }
+        })
 
         stop = false
-        thread {
-            socket = MulticastSocket(4446)
-            val group: InetAddress =
-                InetAddress.getByName("230.1.2.3") // any address between 224.0.0.0 to 239.255.255.255
-            socket?.joinGroup(group)
 
-            val buf = ByteArray(256)
-            while (!stop && socket != null) {
+        val server = intent.getBooleanExtra("SERVER", false)
+        if (server) {
+            thread {
+                val serverSocket = ServerSocket(1234)
+                while (true) {
+                    Log.i(NetworkService::class.java.name, "Waiting clients")
+                    socket = serverSocket.accept()
+                    Log.i(NetworkService::class.java.name, "Got new one: ${socket!!.inetAddress}")
 
-                val packet = DatagramPacket(buf, buf.size)
-                socket?.receive(packet)
-                broadcastData(buf.sliceArray(0 until packet.length))
+                    listening()
+                }
             }
-            socket?.leaveGroup(group)
-            socket?.close()
-            socket = null
+        } else {
+            thread {
+                try {
+                    ip = intent.getStringExtra("IP")!!
+                    socket = Socket(ip, 1234)
+                    listening()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
         }
         return messenger.binder
     }
 
-    override fun onUnbind(intent: Intent?): Boolean {
-        stop = true
+    private fun listening() {
+        val buf = ByteArray(32)
+
+        val inputStream = socket!!.getInputStream()
 
         try {
-            socket?.close()
-            socket = null
+            var size = inputStream.read(buf)
+            while (!stop && socket != null && size >= 0) {
+
+                if (size > 0)
+                    broadcastData(buf.sliceArray(0 until size))
+
+                size = inputStream.read(buf)
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        close()
+
+    }
+
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        stop = true
+
+        close()
         return super.onUnbind(intent)
+    }
+
+
+    private fun send(bytes: ByteArray) {
+        thread {
+            try {
+                checkConnection()
+                socket?.getOutputStream()?.apply {
+                    write(bytes)
+                    flush()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                close()
+            }
+        }
+    }
+
+    private fun checkConnection() {
+        if (!server && ip != null && socket == null) {
+            try {
+                socket = Socket(ip, 1234)
+
+                thread {
+                    listening()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun close() {
+        Log.i(NetworkService::class.java.name, "Closing socket ...")
+        try {
+            socket?.getOutputStream()?.close()
+        } catch (e: Exception) { e.printStackTrace() }
+
+        try {
+            socket?.getInputStream()?.close()
+        } catch (e: Exception) { e.printStackTrace() }
+
+        try {
+            socket?.close()
+        } catch (e: Exception) { e.printStackTrace() }
+        socket = null
     }
 }

@@ -93,7 +93,7 @@ class NetworkCommunicationTest {
     fun newSwitchDetected() {
         val switch = byteArrayOf(0x01,0x02,0x03,0x04,0x05)
 
-        mirrorViewModel.sendSwitch(switch)
+        mirrorViewModel.switchPressed(switch)
 
         val latch = CountDownLatch(1)
         latch.await(1L, TimeUnit.SECONDS)

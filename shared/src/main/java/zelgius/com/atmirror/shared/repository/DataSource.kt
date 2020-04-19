@@ -2,8 +2,8 @@ package zelgius.com.atmirror.shared.repository
 
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.runBlocking
-import zelgius.com.atmirror.shared.entity.FirebaseObject
 import zelgius.com.atmirror.shared.entity.Group
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
@@ -57,7 +57,7 @@ class FlattedGroupDataSource : ItemKeyedDataSource<Group, Any>() {
         params: LoadInitialParams<Group>,
         callback: LoadInitialCallback<Any>
     ) {
-        runBlocking {
+        runBlocking (CoroutineExceptionHandler{_, e -> e.printStackTrace()}){
             firebaseRepository.getPagedGroupFlatted(null, params.requestedLoadSize, callback)
         }
     }

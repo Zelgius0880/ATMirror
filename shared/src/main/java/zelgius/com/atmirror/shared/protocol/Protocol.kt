@@ -22,8 +22,8 @@ abstract class Protocol(val size: Int) {
      */
     constructor(bytes: ByteArray) : this(bytes[1].toInt()) {
         if (size > 0)
-            (0..size).forEach {
-                rawPayload[it] = bytes[it + 2]
+            for (i in 0 until size) {
+                rawPayload[i] = bytes[i + 2]
             }
     }
 
@@ -42,9 +42,10 @@ abstract class Protocol(val size: Int) {
                 Code.ACK.number -> Ack(
                     bytes
                 )
-                Code.STOP_DISCOVERY.number, Code.NEW_SWITCH.number -> if (bytes[1] > 0) NewSwitch(
-                    bytes
-                ) else StartDiscovery()
+                Code.STOP_DISCOVERY.number, Code.NEW_SWITCH.number ->
+                    if (bytes[1] > 0) NewSwitch(
+                        bytes
+                    ) else StartDiscovery()
                 Code.STOP_DISCOVERY.number -> StopDiscovery()
                 Code.GET_CURRENT_STATUS.number, Code.CURRENT_STATUS.number -> if (bytes[1] > 0) CurrentStatus(
                     bytes

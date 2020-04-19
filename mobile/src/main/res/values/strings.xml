@@ -15,4 +15,11 @@
     <string name="add_switch">Add switch</string>
     <string name="waiting_mirror">Waiting response from mirror</string>
     <string name="press_on_switch">Ready to detect. You can now press on a switch</string>
+    <string name="nothing_to_display">Nothing to display</string>
+    <string name="cancel">Cancel</string>
+    <string name="field_requied">Field requiered</string>
+    <string name="switch_already_exists">This switch already exists in the group</string>
+    <string name="item_saved">Item saved</string>
+    <string name="undo">Undo</string>
+    <string name="item_deleted">Item deleted</string>
 </resources>

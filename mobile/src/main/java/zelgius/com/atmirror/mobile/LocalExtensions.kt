@@ -13,8 +13,10 @@ import com.google.android.material.textfield.TextInputLayout
 val ViewBinding.context
     get() = this.root.context!!
 
-val TextInputLayout.text
+
+var TextInputLayout.text
     get() = editText?.text?.toString()
+    set(value) = editText!!.setText(value)
 
 fun Activity.hideKeyboard() {
     val view = this.currentFocus

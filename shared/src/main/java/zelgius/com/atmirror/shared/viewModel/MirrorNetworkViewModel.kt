@@ -6,50 +6,47 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.protocol.CurrentStatus
-import zelgius.com.atmirror.shared.protocol.NewSwitch
 import zelgius.com.atmirror.shared.repository.NetworkRepository
+import zelgius.com.atmirror.shared.repository.State
 
 class MirrorNetworkViewModel(val app: Application) : AndroidViewModel(app) {
-    private val _status = MutableLiveData<CurrentStatus.Status>(CurrentStatus.Status.NOT_WORKING)
-    val status: LiveData<CurrentStatus.Status>
-        get() = _status
+    var status: State = State.NOT_WORKING
 
-    private val repository = NetworkRepository(app).apply {
-        startDiscoveryListener = {
-            _status.postValue(CurrentStatus.Status.SWITCH_DISCOVERING)
-        }
 
-        stopDiscoveryListener = {
-            _status.postValue(CurrentStatus.Status.NOT_WORKING)
-        }
+    private val stateListener: (State) -> Unit = {
+            status = it
 
-        getCurrentStatusListener = {
-            sendCurrentStatus()
-        }
-    }
-
-    private fun sendCurrentStatus() {
-        viewModelScope.launch {
-            repository.sendMessage(CurrentStatus(_status.value ?: CurrentStatus.Status.NOT_WORKING))
-        }
-    }
-
-    fun sendSwitch(bytes: ByteArray) {
-        if (_status.value == CurrentStatus.Status.SWITCH_DISCOVERING)
             viewModelScope.launch {
-                repository.sendMessage(NewSwitch(bytes))
+                when (status) {
+                    State.NOT_WORKING -> {
+                        repository.stopDiscovery()
+                        repository.sendSwitch(null)
+                    }
+                    State.DISCOVERING -> {
+                        repository.startDiscovery()
+                    }
+                }
             }
     }
 
-    init {
-        repository.bind()
+    private val repository = NetworkRepository(
+        phoneStateChangedListener = stateListener
+    )
+
+
+    fun switchPressed(bytes: ByteArray) {
+        if (status == State.DISCOVERING)
+            viewModelScope.launch {
+                repository.sendSwitch(Switch(bytes))
+            }
     }
 
     override fun onCleared() {
         super.onCleared()
 
-        repository.unbind()
+        repository.removeListeners()
     }
 
 }

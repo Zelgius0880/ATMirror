@@ -8,13 +8,14 @@ import android.hardware.SensorManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.drivers.sht21.SHT21SensorDriver
+import zelgius.com.atmirror.shared.repository.FirebaseRepository
 import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
+import zelgius.com.utils.Networking
 import java.util.*
 
 
 class MainViewModel(private val context: Application) : SharedMainViewModel(context), SensorEventListener {
     private val sensorCallback = SensorCallback()
-
 
 
     val sht21 = SHT21SensorDriver("I2C1").apply {
@@ -80,4 +81,5 @@ class MainViewModel(private val context: Application) : SharedMainViewModel(cont
             sensorManager.unregisterListener(this@MainViewModel)
         }
     }
+
 }
