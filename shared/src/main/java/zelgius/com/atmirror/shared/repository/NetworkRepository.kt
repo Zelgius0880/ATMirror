@@ -15,12 +15,11 @@ class NetworkRepository(
     var switchListener: (Switch?) -> Unit = {},
     var phoneStateChangedListener: ((State) -> Unit)? = null,
     var mirrorStateChangedListener: ((State) -> Unit)? = null
-) {
+) : FirebaseRepository(){
 
     private var phoneListenerRegistration: ListenerRegistration? = null
     private var mirrorListenerRegistration: ListenerRegistration? = null
     private var switchListenerRegistration: ListenerRegistration? = null
-    val repository = FirebaseRepository()
 
     private val path = if (mirrorStateChangedListener == null) "mirror" else "phone"
 
@@ -28,21 +27,22 @@ class NetworkRepository(
         CoroutineScope(Dispatchers.Default).launch {
             if (mirrorStateChangedListener != null) {
                 setUpMirrorStateListener()
-                setUpSwitchStateListener()
+                setUpSwitchListener()
             } else { // mirror case -> listening the mirror state
                 setUpPhoneStateListener()
             }
         }
+
     }
 
      suspend fun startDiscovery() =
         withContext(Dispatchers.Default) {
-            repository.createOrUpdate(StateElement(key =path, state = State.DISCOVERING), "states")
+            createOrUpdate(StateElement(key =path, state = State.DISCOVERING), "states")
         }
 
     suspend fun stopDiscovery() =
         withContext(Dispatchers.Default) {
-            repository.createOrUpdate(StateElement(key = path, state = State.NOT_WORKING), "states")
+            createOrUpdate(StateElement(key = path, state = State.NOT_WORKING), "states")
         }
 
     suspend fun sendSwitch(switch: Switch?) =
@@ -50,10 +50,11 @@ class NetworkRepository(
 
             if(switch != null) {
                 switch.key = "lastKnownSwitch"
-                repository.createOrUpdate(switch, "states")
+                createOrUpdate(switch, "states")
             } else
-                repository.delete("lastKnownSwitch", "states")
+                delete("lastKnownSwitch", "states")
         }
+
 
     @IgnoreExtraProperties
     data class StateElement(
@@ -71,17 +72,17 @@ class NetworkRepository(
     }
 
     private suspend fun setUpPhoneStateListener() {
-        phoneListenerRegistration = repository.listen("phone", "states") { snapshot, exception ->
+        phoneListenerRegistration = listen("phone", "states") { snapshot, exception ->
             exception?.printStackTrace()
 
-            if (snapshot != null && snapshot.getField<String>("state") != null)
+            if (snapshot?.getField<String>("state") != null)
                 phoneStateChangedListener?.invoke(snapshot.getField("state")!!)
         }
     }
 
 
     private suspend fun setUpMirrorStateListener() {
-        mirrorListenerRegistration = repository.listen("mirror", "states") { snapshot, exception ->
+        mirrorListenerRegistration = listen("mirror", "states") { snapshot, exception ->
             exception?.printStackTrace()
 
             if (snapshot != null && snapshot.getField<String>("state") != null)
@@ -90,9 +91,9 @@ class NetworkRepository(
 
     }
 
-    private suspend fun setUpSwitchStateListener() {
+    private suspend fun setUpSwitchListener() {
         mirrorListenerRegistration =
-            repository.listen("lastKnownSwitch", "states") { snapshot, exception ->
+            listen("lastKnownSwitch", "states") { snapshot, exception ->
                 exception?.printStackTrace()
 
                 if (snapshot != null) {
@@ -100,9 +101,7 @@ class NetworkRepository(
                         switchListener.invoke(if(snapshot.exists() && !snapshot.metadata.isFromCache) switch else null)
                 }
             }
-
     }
-
 
 }
 

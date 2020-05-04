@@ -3,12 +3,13 @@ package zelgius.com.atmirror.mobile.fragment
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.firebase.ui.firestore.paging.LoadingState
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_edit.view.*
-import zelgius.com.atmirror.mobile.AddSwitchDialog
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.EditGroupAdapter
 import zelgius.com.atmirror.mobile.databinding.FragmentEditBinding
+import zelgius.com.atmirror.mobile.dialog.AddSwitchDialog
 import zelgius.com.atmirror.mobile.hideKeyboard
 import zelgius.com.atmirror.mobile.text
 import zelgius.com.atmirror.mobile.viewModel.EditViewModel
@@ -56,12 +57,28 @@ class EditFragment : Fragment() {
                 }
             },
             itemRemovedListener = {
-                editViewModel.delete(it).observe(this) {_ ->
+                editViewModel.delete(it).observe(this) { _ ->
                     adapter.refresh()
                     showUndoSnackBar(it)
                 }
             }
         )
+        adapter.loadingStatus.observe(this) {
+            when (it) {
+                LoadingState.LOADING_INITIAL -> {
+                }
+                LoadingState.LOADING_MORE -> {
+                }
+                LoadingState.LOADED -> {
+                    binding.progressBarList.visibility = View.INVISIBLE
+                }
+                LoadingState.FINISHED -> {
+                    binding.progressBarList.visibility = View.INVISIBLE
+                }
+                LoadingState.ERROR -> {
+                }
+            }
+        }
 
         binding.recyclerView.adapter = adapter
 
@@ -92,8 +109,8 @@ class EditFragment : Fragment() {
             }
         }
 
-        binding.menu.menuLayouts = arrayOf(binding.addLightLayout, binding.addSwitchLayout)
-        binding.menu.rotationAnimation = 45f
+        //binding.menu.menuLayouts = arrayOf(binding.addLightLayout, binding.addSwitchLayout)
+        //binding.menu.rotationAnimation = 45f
         binding.addSwitch.setOnClickListener {
             AddSwitchDialog().apply {
                 listener = {
@@ -114,6 +131,11 @@ class EditFragment : Fragment() {
                 }
             }.show(parentFragmentManager, "add_switch")
         }
+
+
+        binding.addLight.setOnClickListener {
+            findNavController().navigate(R.id.action_editFragment_to_addLightFragment)
+        }
     }
 
     private fun showUndoSnackBar(item: GroupItem) {
@@ -128,7 +150,7 @@ class EditFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_fragment_edit, menu)
+        inflater.inflate(R.menu.menu_save, menu)
     }
 
     override fun onStart() {

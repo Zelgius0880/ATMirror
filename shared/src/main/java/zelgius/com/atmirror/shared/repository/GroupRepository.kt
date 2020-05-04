@@ -179,29 +179,7 @@ class GroupRepository : FirebaseRepository() {
     suspend fun createOrUpdate(item: GroupItem, checkUnique: Boolean = false) {
         createOrUpdate(item, item.firebasePath, if(checkUnique) "uid" to item.uid else null)
     }
-
-
-    @TestOnly // Deleting collections from android is not recommended
-    suspend fun delete(group: Group) =
-        withContext(Dispatchers.Default) {
-            group.lights.forEach {
-                it.group = group
-                delete(it, it.firebasePath)
-            }
-
-            group.switches.forEach {
-                it.group = group
-                delete(it, it.firebasePath)
-            }
-
-            delete(group, Group.FIREBASE_PATH)
-        }
-
-    fun getGroupDataSource() = GroupDataSourceFactory()
     fun getFlattedGroupDataSource() = FlattedGroupDataSourceFactory()
-
-    fun getGroupQuery(): Query =
-        db.collection(Group.FIREBASE_PATH).orderBy("name")
 
     fun getItemsQuery(group: Group): Query =
         db.collection(Group.FIREBASE_PATH).document(group.key!!).collection(GroupItem.FIREBASE_PATH)

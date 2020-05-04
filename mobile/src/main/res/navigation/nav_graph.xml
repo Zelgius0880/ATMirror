@@ -22,5 +22,18 @@
     <fragment
             android:id="@+id/editFragment"
             android:name="zelgius.com.atmirror.mobile.fragment.EditFragment"
-            android:label="EditFragment" />
+            android:label="EditFragment" >
+        <action
+                android:id="@+id/action_editFragment_to_addLightFragment"
+                app:destination="@id/addLightFragment"
+                app:enterAnim="@anim/nav_default_enter_anim"
+                app:exitAnim="@anim/nav_default_exit_anim"
+                app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                app:popExitAnim="@anim/nav_default_pop_exit_anim"
+                app:popUpTo="@id/addLightFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/addLightFragment"
+            android:name="zelgius.com.atmirror.mobile.fragment.AddLightFragment"
+            android:label="AddLightFragment" />
 </navigation>

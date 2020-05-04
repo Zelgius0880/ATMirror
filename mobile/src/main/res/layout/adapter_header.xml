@@ -8,6 +8,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,25 +19,71 @@
             android:layout_height="wrap_content">
 
         <com.google.android.material.button.MaterialButton
-                android:id="@+id/edit"
-                style="@style/Widget.ATMirror.ImageButton"
+                android:id="@+id/list_hue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                app:icon="@drawable/ic_baseline_play_arrow_24"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="@string/list_lights"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-                android:id="@+id/name"
+                android:id="@+id/textView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/lifx"
+                android:textAppearance="?textAppearanceBody1"
+                app:layout_constraintBottom_toBottomOf="@+id/list_lifx"
+                app:layout_constraintEnd_toStartOf="@+id/list_hue"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toEndOf="@+id/setting_hue"
+                app:layout_constraintTop_toTopOf="@+id/list_lifx" />
+
+        <Button
+                android:id="@+id/setting_hue"
+                style="@style/Widget.ATMirror.ImageButton.OutlinedButton"
+                android:layout_marginStart="8dp"
+                app:icon="@drawable/ic_baseline_settings_24"
+                app:layout_constraintBottom_toBottomOf="@+id/list_hue"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/list_hue" />
+
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/list_lifx"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/list_lights"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/edit"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/list_hue" />
+
+        <Button
+                android:id="@+id/setting_lifx"
+                style="@style/Widget.ATMirror.ImageButton.OutlinedButton"
+                android:layout_marginStart="8dp"
+                app:icon="@drawable/ic_baseline_settings_24"
+                app:layout_constraintBottom_toBottomOf="@+id/list_lifx"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@+id/list_lifx" />
+
+        <TextView
+                android:id="@+id/textView2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/philips_hue"
+                android:textAppearance="?textAppearanceBody1"
+                app:layout_constraintBottom_toBottomOf="@+id/list_hue"
+                app:layout_constraintEnd_toStartOf="@+id/list_hue"
+                app:layout_constraintStart_toEndOf="@+id/setting_hue"
+                app:layout_constraintTop_toTopOf="@+id/list_hue" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
 

@@ -10,10 +10,10 @@ import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.protocol.CurrentStatus
 import zelgius.com.atmirror.shared.repository.NetworkRepository
 import zelgius.com.atmirror.shared.repository.State
+import zelgius.com.lights.repository.LIFXService
 
 class MirrorNetworkViewModel(val app: Application) : AndroidViewModel(app) {
     var status: State = State.NOT_WORKING
-
 
     private val stateListener: (State) -> Unit = {
             status = it

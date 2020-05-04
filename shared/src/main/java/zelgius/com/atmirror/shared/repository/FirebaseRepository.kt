@@ -15,8 +15,18 @@ import kotlin.coroutines.suspendCoroutine
 
 
 open class FirebaseRepository(val anonymousAuth: Boolean = true) {
-    protected val db = FirebaseFirestore.getInstance()
-    protected val auth = FirebaseAuth.getInstance()
+    protected val db = FirebaseFirestore.getInstance().apply {
+        firestoreSettings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+    }
+    private val auth = FirebaseAuth.getInstance()
+
+    suspend fun db()=
+        withContext(Dispatchers.Default){
+            checkLogin()
+            db
+        }
 
     init {
 

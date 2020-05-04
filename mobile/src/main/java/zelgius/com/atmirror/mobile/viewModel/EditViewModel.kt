@@ -35,7 +35,7 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
             .setQuery(
                 groupRepository.getItemsQuery(_group.value!!),
                 PagedList.Config.Builder()
-                    .setEnablePlaceholders(false)
+                    .setEnablePlaceholders(true)
                     .setPrefetchDistance(10)
                     .setPageSize(20)
                     .build()
@@ -79,28 +79,52 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
         return liveData
     }
 
+    /**
+     * the LiveData will contains a list a GroupItem that could not be updated.
+     * When update is true, the list should be empty, or else there is a strange problem
+     * When update is false, the list should contains the list of elements that are already present in the group (and so, cannot be added)
+     */
+    fun save(list: List<GroupItem>, update: Boolean = false): LiveData<List<GroupItem>> {
+        val liveData = MutableLiveData<List<GroupItem>>()
+        val listNotSaved = mutableListOf<GroupItem>()
+
+        viewModelScope.launch {
+            list.forEach {
+                if (!saveItem(it, update))
+                    listNotSaved.add(it)
+            }
+
+            liveData.value = listNotSaved
+        }
+
+        return liveData
+    }
+
     fun save(item: GroupItem, update: Boolean = false): LiveData<Boolean> {
         //_progress.value = true
         val liveData = MutableLiveData<Boolean>()
 
         viewModelScope.launch {
-            try {
-                if (item is Light)
-                    groupRepository.createOrUpdate(item.copy(group = editingGroup), !update)
-                else
-                    groupRepository.createOrUpdate(
-                        (item as Switch).copy(group = editingGroup),
-                        true
-                    )
-
-                liveData.value = true
-                //_progress.value = false
-            } catch (e: FirebaseRepository.AlreadyExistsException) {
-                e.printStackTrace()
-                liveData.value = false
-            }
+            liveData.value = saveItem(item, update)
         }
 
         return liveData
     }
+
+    private suspend fun saveItem(item: GroupItem, update: Boolean = false): Boolean =
+        try {
+            if (item is Light)
+                groupRepository.createOrUpdate(item.copy(group = editingGroup), !update)
+            else
+                groupRepository.createOrUpdate(
+                    (item as Switch).copy(group = editingGroup),
+                    true
+                )
+            true
+            //_progress.value = false
+        } catch (e: FirebaseRepository.AlreadyExistsException) {
+            e.printStackTrace()
+            false
+        }
+
 }

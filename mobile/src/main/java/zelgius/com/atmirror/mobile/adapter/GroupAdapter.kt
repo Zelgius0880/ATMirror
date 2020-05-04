@@ -1,19 +1,15 @@
 package zelgius.com.atmirror.mobile.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ExpandableListView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.databinding.*
 import zelgius.com.atmirror.shared.entity.*
-import zelgius.com.swipetodelete.SwipeToDeletePagedAdapter
 
 class GroupAdapter(private val editListener: (Group) -> Unit) :
-    PagedListAdapter<Any, GroupAdapter.BindableViewHolder<*>>(DIFF_UTIL) {
+    PagedListAdapter<Any, BindableViewHolder<*>>(DIFF_UTIL) {
 
     override fun getItemViewType(position: Int): Int =
         when {
@@ -70,27 +66,6 @@ class GroupAdapter(private val editListener: (Group) -> Unit) :
 
     }
 
-    inner class SwitchViewHolder(private val binder: AdapterSwitchBinding) :
-        BindableViewHolder<Switch>(binder.root) {
-        override fun bind(item: Switch) {
-            binder.name.text = binder.root.context.getString(R.string.switch_name_format, item.uid)
-        }
-    }
-
-    inner class LightViewHolder(private val binder: AdapterLightBinding) :
-        BindableViewHolder<Light>(binder.root) {
-        override fun bind(item: Light) {
-            binder.name.text = item.name
-            binder.state.setText(
-                when(item.state){
-                    Light.State.ON -> R.string.turn_on
-                    Light.State.OFF ->  R.string.turn_off
-                    Light.State.TOGGLE -> R.string.toggle
-                }
-            )
-        }
-    }
-
     inner class GroupViewHolder(private val binder: AdapterGroupBinding) :
         BindableViewHolder<Group>(binder.root) {
         override fun bind(item: Group) {
@@ -102,10 +77,6 @@ class GroupAdapter(private val editListener: (Group) -> Unit) :
         }
     }
 
-
-    abstract class BindableViewHolder<T>(view: View) : RecyclerView.ViewHolder(view) {
-        abstract fun bind(item: T)
-    }
 
     override fun onBindViewHolder(
         holder: BindableViewHolder<*>,

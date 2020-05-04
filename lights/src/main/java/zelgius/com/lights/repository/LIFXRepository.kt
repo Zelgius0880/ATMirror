@@ -10,6 +10,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import java.io.IOException
 
 
 object LIFXService {
@@ -22,7 +23,9 @@ object LIFXService {
 
         httpClient.addInterceptor(object : Interceptor {
             override fun intercept(chain: Interceptor.Chain): Response {
-                val request = chain.request().newBuilder().addHeader("Authorization", "Bearer $token").build();
+                val request =
+                    chain.request().newBuilder().addHeader("Authorization", "Bearer $token")
+                        .build();
                 return chain.proceed(request);
             }
         });
@@ -38,10 +41,17 @@ object LIFXService {
     private val service by lazy { retrofit.create(LIFXServiceInterface::class.java) }
 
 
-    suspend fun getLightList(): List<LIFXLight> =
+    suspend fun getLightList(): List<LIFXLight>? =
         withContext(Dispatchers.IO) {
-            service.getLightList().execute().body()
-                ?: listOf()
+            try {
+                with(service.getLightList().execute()) {
+                    if(!isSuccessful) null
+                    else body()?: listOf()
+                }
+            } catch (e: IOException) {
+                null
+            }
+
         }
 
     suspend fun setLightState(

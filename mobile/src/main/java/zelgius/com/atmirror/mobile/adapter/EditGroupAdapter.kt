@@ -6,8 +6,11 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
+import com.firebase.ui.firestore.paging.LoadingState
 import org.jetbrains.annotations.NotNull
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.context
@@ -16,6 +19,7 @@ import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.repository.FirestoreGroupItemMapper
+import zelgius.com.lights.repository.ILight
 import zelgius.com.swipetodelete.SwipeToDeleteFirestorePagedAdapter
 import zelgius.com.utils.dpToPx
 
@@ -27,8 +31,12 @@ class EditGroupAdapter(
     SwipeToDeleteFirestorePagedAdapter<GroupItem, EditGroupAdapter.BindableViewHolder<*>>(
         GroupItem::class.java,
         options,
-        deleteListener =  itemRemovedListener
+        deleteListener = { itemRemovedListener(it) }
     ) {
+
+    private val _loadingStatus = MutableLiveData<LoadingState>()
+    val loadingStatus: LiveData<LoadingState>
+        get() = _loadingStatus
 
     override fun getItemViewType(position: Int): Int =
         when (FirestoreGroupItemMapper.map(getItem(position)!!)) {
@@ -58,16 +66,22 @@ class EditGroupAdapter(
             else -> error("don't know what to do")
         }
 
+    override fun onLoadingStateChanged(state: LoadingState) {
+        super.onLoadingStateChanged(state)
+        _loadingStatus.postValue(state)
+    }
 
     override fun onBindViewHolder(holder: BindableViewHolder<*>, position: Int, model: GroupItem) {
-        when (holder) {
+        if (model != null) {
+            when (holder) {
 
-            is SwitchViewHolder -> (model as Switch).let {
-                holder.bind(it)
-            }
+                is SwitchViewHolder -> (model as Switch).let {
+                    holder.bind(it)
+                }
 
-            is LightViewHolder -> (model as Light).let {
-                holder.bind(it)
+                is LightViewHolder -> (model as Light).let {
+                    holder.bind(it)
+                }
             }
         }
 
@@ -80,7 +94,8 @@ class EditGroupAdapter(
     inner class SwitchViewHolder(private val binder: AdapterSwitchBinding) :
         BindableViewHolder<Switch>(binder.root) {
         override fun bind(item: Switch) {
-            binder.name.text = binder.root.context.getString(R.string.switch_name_format, item.uid)
+            binder.name.text = item.name
+            binder.uid.text = item.uid
         }
     }
 
@@ -90,6 +105,13 @@ class EditGroupAdapter(
             binder.name.text = item.name
             val adapter = LightStatusDropDownAdapter(binder.context)
             binder.spinner.adapter = adapter
+
+            binder.type.setText(
+                when (item.type) {
+                    ILight.Type.HUE -> R.string.hue
+                    ILight.Type.LIFX -> R.string.lifx
+                }
+            )
 
             adapter.apply {
                 binder.spinner.setSelection(getPosition(item.state))
@@ -105,7 +127,7 @@ class EditGroupAdapter(
                         ) {
                             with(getItem(position)!!) {
                                 if (this != item.state)
-                                    itemChangedListener(item.also { it.state = this})
+                                    itemChangedListener(item.also { it.state = this })
                             }
                         }
                     }

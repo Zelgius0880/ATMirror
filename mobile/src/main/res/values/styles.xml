@@ -38,12 +38,30 @@
 
         <item name="textInputStyle">@style/Widget.ATMirror.TextInput</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.ATMirror.MaterialAlertDialog</item>
-        <item name="materialCardViewStyle">@style/ThemeOverlay.ATMirror.MaterialAlertDialog</item>
+        <item name="materialCardViewStyle">@style/Widget.ATMirror.MaterialCardViewStyle</item>
         <!--<item name="seekBarStyle">@style/Widget.ATMirror.SeekBar</item>-->
     </style>
 
     <style name="Widget.ATMirror.ImageButton" parent="Widget.MaterialComponents.Button">
         <!--<item name="backgroundTint">@color/primaryDarkColor</item>-->
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="tint">@color/md_white_1000</item>
+        <item name="rippleColor">@color/md_white_1000</item>
+        <item name="elevation">0dp</item>
+        <item name="iconSize">24dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.ATMirror.ImageButton.Secondary" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/colorSecondary</item>
         <item name="android:paddingRight">8dp</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingEnd">8dp</item>
@@ -66,10 +84,28 @@
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingEnd">8dp</item>
         <item name="android:paddingStart">8dp</item>
-        <item name="android:layout_width">48dp</item>
-        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="tint">@color/md_white_1000</item>
         <item name="rippleColor">@color/md_white_1000</item>
+        <item name="elevation">0dp</item>
+        <item name="iconSize">24dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.ATMirror.ImageButton.TextButton.Secondary" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="backgroundTint">@color/colorSecondary</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="tint">@color/colorSecondary</item>
+        <item name="rippleColor">@color/colorPrimaryVariant</item>
         <item name="elevation">0dp</item>
         <item name="iconSize">24dp</item>
         <item name="android:insetLeft">0dp</item>
@@ -84,8 +120,24 @@
         <item name="android:paddingStart">8dp</item>
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">40dp</item>
-        <item name="tint">@color/md_white_1000</item>
-        <item name="rippleColor">@color/md_white_1000</item>
+        <item name="iconTint">@color/colorPrimary</item>
+        <item name="rippleColor">@color/colorSecondary</item>
+        <item name="elevation">0dp</item>
+        <item name="iconSize">24dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.ATMirror.ImageButton.OutlinedButton.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <!--<item name="backgroundTint">@color/primaryDarkColor</item>-->
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="iconTint">@color/colorSecondaryVariant</item>
+        <item name="rippleColor">@color/colorPrimaryVariant</item>
         <item name="elevation">0dp</item>
         <item name="iconSize">24dp</item>
         <item name="android:insetLeft">0dp</item>
@@ -110,19 +162,21 @@
     </style>
 
     <style name="Widget.ATMirror.MaterialCardViewStyle" parent="Widget.MaterialComponents.CardView">
-        <item name="colorSurface">@color/md_white_1000</item>
+        <item name="colorSurface">@color/colorCardSurface</item>
+        <item name="cardBackgroundColor">@color/check_card_selector</item>
+        <item name="rippleColor">@color/colorPrimaryVariant</item>
     </style>
 
 
-    <style name="Widget.ATMirror.MaterialCardViewStyle.Primary" parent="Widget.MaterialComponents.CardView">
+    <style name="Widget.ATMirror.MaterialCardViewStyle.Primary" parent="Widget.ATMirror.MaterialCardViewStyle">
         <item name="cardBackgroundColor">@color/md_teal_50</item>
     </style>
 
-    <style name="Widget.ATMirror.MaterialCardViewStyle.Secondary" parent="Widget.MaterialComponents.CardView">
+    <style name="Widget.ATMirror.MaterialCardViewStyle.Secondary" parent="Widget.ATMirror.MaterialCardViewStyle">
         <item name="cardBackgroundColor">@color/md_green_50</item>
     </style>
 
-    <style name="Widget.ATMirror.MaterialCardViewStyle.Neutral" parent="Widget.MaterialComponents.CardView">
+    <style name="Widget.ATMirror.MaterialCardViewStyle.Neutral" parent="Widget.ATMirror.MaterialCardViewStyle">
         <item name="cardBackgroundColor">@color/md_white_1000</item>
     </style>
 </resources>
