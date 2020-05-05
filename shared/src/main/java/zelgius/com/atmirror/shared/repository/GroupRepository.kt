@@ -176,6 +176,10 @@ class GroupRepository : FirebaseRepository() {
         delete(item, item.firebasePath)
     }
 
+    suspend fun delete(item: Group) {
+        delete(item, item.firebasePath)
+    }
+
     suspend fun createOrUpdate(item: GroupItem, checkUnique: Boolean = false) {
         createOrUpdate(item, item.firebasePath, if(checkUnique) "uid" to item.uid else null)
     }

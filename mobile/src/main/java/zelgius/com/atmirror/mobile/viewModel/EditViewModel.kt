@@ -50,22 +50,16 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
 
     fun save(group: Group): LiveData<Boolean> {
         _progress.value = true
-        val liveData = MutableLiveData<Boolean>()
-
-        viewModelScope.launch {
-            val copy = group.copy(items = listOf())
+        return liveData {
+            val copy = group.copy(items = listOf<GroupItem>())
             groupRepository.createOrUpdate(copy)
-            liveData.value = true
             this@EditViewModel.setGroup(copy)
             _progress.value = false
+            emit(true)
         }
-
-        return liveData
     }
 
-    fun delete(item: GroupItem): LiveData<Boolean> {
-        val liveData = MutableLiveData<Boolean>()
-        viewModelScope.launch {
+    fun delete(item: GroupItem) = liveData {
             groupRepository.delete(
                 when (item) {
                     is Switch -> item.copy(group = editingGroup)
@@ -73,11 +67,14 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
                     else -> error("Should not be there")
                 }
             )
-            liveData.postValue(true)
+            emit(true)
         }
 
-        return liveData
-    }
+    fun delete(item: Group) =
+        liveData {
+            groupRepository.delete(item)
+            emit(true)
+        }
 
     /**
      * the LiveData will contains a list a GroupItem that could not be updated.

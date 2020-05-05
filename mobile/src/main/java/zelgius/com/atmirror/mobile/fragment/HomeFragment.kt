@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.DiffUtil
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.GroupAdapter
 import zelgius.com.atmirror.mobile.databinding.*
+import zelgius.com.atmirror.mobile.dialog.AddGroupDialog
+import zelgius.com.atmirror.mobile.snackBar
 import zelgius.com.atmirror.mobile.viewModel.EditViewModel
 import zelgius.com.atmirror.mobile.viewModel.HomeViewModel
+import zelgius.com.atmirror.shared.entity.Group
 import zelgius.com.atmirror.shared.protocol.CurrentStatus
 import zelgius.com.atmirror.shared.viewModel.PhoneNetworkViewModel
 import zelgius.com.utils.ViewModelHelper
@@ -26,10 +29,17 @@ class HomeFragment : Fragment() {
     }
 
     private val adapter by lazy {
-        GroupAdapter{
+        GroupAdapter(editListener = {
             editViewModel.setGroup(it)
             navController.navigate(R.id.action_homeFragment_to_editFragment)
-        }
+        },
+        deleteListener = {
+            editViewModel.delete(it).observe(this) {
+                snackBar(getString(R.string.item_deleted))
+                binding.progressBar.visibility = View.VISIBLE
+                fetchList()
+            }
+        })
     }
     private var _binding: FragmentHomeBinding? = null
     private val navController by lazy { findNavController() }
@@ -40,7 +50,6 @@ class HomeFragment : Fragment() {
 
 
     private val homeViewModel by lazy { ViewModelHelper.create<HomeViewModel>(requireActivity()) }
-    private var lastKnownStatus = CurrentStatus.Status.NOT_WORKING
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +71,21 @@ class HomeFragment : Fragment() {
         binding.recyclerView.adapter = adapter
 
         binding.progressBar.visibility = View.VISIBLE
+        fetchList()
+
+        binding.addGroup.setOnClickListener {
+            AddGroupDialog().apply {
+                listener = {
+                    binding.progressBar.visibility = View.VISIBLE
+                    editViewModel.save(Group(name = it)).observe(this@HomeFragment) {
+                        fetchList()
+                    }
+                }
+            }.show(parentFragmentManager, "add_group")
+        }
+    }
+
+    private fun fetchList() {
         homeViewModel.getGroups().observe(this) {
             binding.progressBar.visibility = View.GONE
             adapter.submitList(it)
@@ -81,21 +105,6 @@ class HomeFragment : Fragment() {
                 arguments = Bundle().apply {
                 }
             }
-
-        private val DIFF_CALLBACK = object :
-            DiffUtil.ItemCallback<Any>() {
-            // Concert details may have changed if reloaded from the database,
-            // but ID is fixed.
-            override fun areItemsTheSame(
-                old: Any,
-                new: Any
-            ) = old == new
-
-            override fun areContentsTheSame(
-                old: Any,
-                new: Any
-            ) = true
-        }
     }
 
     override fun onDestroyView() {

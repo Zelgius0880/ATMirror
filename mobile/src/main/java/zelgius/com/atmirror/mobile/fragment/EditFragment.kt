@@ -150,7 +150,7 @@ class EditFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_save, menu)
+        inflater.inflate(R.menu.menu_delete, menu)
     }
 
     override fun onStart() {

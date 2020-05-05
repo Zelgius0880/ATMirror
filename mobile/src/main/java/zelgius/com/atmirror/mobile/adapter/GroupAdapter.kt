@@ -1,6 +1,7 @@
 package zelgius.com.atmirror.mobile.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -8,7 +9,10 @@ import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.databinding.*
 import zelgius.com.atmirror.shared.entity.*
 
-class GroupAdapter(private val editListener: (Group) -> Unit) :
+class GroupAdapter(
+    private val editListener: (Group) -> Unit,
+    private val deleteListener: (Group) -> Unit
+) :
     PagedListAdapter<Any, BindableViewHolder<*>>(DIFF_UTIL) {
 
     override fun getItemViewType(position: Int): Int =
@@ -74,6 +78,11 @@ class GroupAdapter(private val editListener: (Group) -> Unit) :
             binder.edit.setOnClickListener {
                 editListener(item)
             }
+
+            binder.delete.visibility = if (item.items.isNotEmpty()) View.GONE else View.VISIBLE
+            binder.delete.setOnClickListener {
+                deleteListener(item)
+            }
         }
     }
 
@@ -102,7 +111,7 @@ class GroupAdapter(private val editListener: (Group) -> Unit) :
     companion object {
         val DIFF_UTIL = object : DiffUtil.ItemCallback<Any>() {
             override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean =
-                when(oldItem) {
+                when (oldItem) {
                     is Switch -> (newItem as FirebaseObject).key == oldItem.key
                     is Group -> (newItem as FirebaseObject).key == oldItem.key
                     is Light -> (newItem as FirebaseObject).key == oldItem.key
@@ -111,16 +120,19 @@ class GroupAdapter(private val editListener: (Group) -> Unit) :
 
             override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean =
                 oldItem.javaClass.name == newItem.javaClass.name &&
-                        when(oldItem) {
+                        when (oldItem) {
                             is Switch -> (newItem as Switch).let {
                                 it.uid == oldItem.uid && it.name == oldItem.name
                             }
 
-                            is Group -> (newItem as Group).name == oldItem.name
+                            is Group -> with(newItem as Group) {
+                                name == oldItem.name && items.size == oldItem.items.size
+                            }
 
                             is Light -> (newItem as Light) == oldItem
                             else -> false
                         }
+
 
         }
     }

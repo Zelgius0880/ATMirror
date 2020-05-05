@@ -23,17 +23,12 @@ class AddGroupDialog : DialogFragment() {
         get() = _binding!!
 
     var listener: (String) -> Unit = {}
-    private val viewModel by lazy {
-        ViewModelHelper.create<EditViewModel>(
-            requireActivity()
-        )
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = DialogAddGroupBinding.inflate(LayoutInflater.from(requireActivity()))
 
         return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.add_switch)
+            .setTitle(R.string.add_group)
             .setView(binding.root)
             .setPositiveButton(R.string.save, null)
             .setNegativeButton(R.string.cancel, null)

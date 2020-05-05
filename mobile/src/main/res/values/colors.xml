@@ -11,4 +11,5 @@
     <color name="label_background_color">#99000000</color>
     <color name="text_label_background_color">#CCFFFFFF</color>
     <color name="fab_tint">#FFF</color>
+    <color name="colorCriticalAction">@color/md_red_300</color>
 </resources>
