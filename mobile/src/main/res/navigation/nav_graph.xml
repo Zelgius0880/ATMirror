@@ -7,7 +7,7 @@
     <fragment
             android:id="@+id/homeFragment"
             android:name="zelgius.com.atmirror.mobile.fragment.HomeFragment"
-            android:label="fragment_home"
+            android:label="@string/home_fragment"
             tools:layout="@layout/fragment_home" >
         <action
                 android:id="@+id/action_homeFragment_to_editFragment"
@@ -22,7 +22,7 @@
     <fragment
             android:id="@+id/editFragment"
             android:name="zelgius.com.atmirror.mobile.fragment.EditFragment"
-            android:label="EditFragment" >
+            android:label="@string/edit_fragment" >
         <action
                 android:id="@+id/action_editFragment_to_addLightFragment"
                 app:destination="@id/addLightFragment"
@@ -35,5 +35,5 @@
     <fragment
             android:id="@+id/addLightFragment"
             android:name="zelgius.com.atmirror.mobile.fragment.AddLightFragment"
-            android:label="AddLightFragment" />
+            android:label="@string/add_light_fragment" />
 </navigation>

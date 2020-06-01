@@ -22,6 +22,7 @@ import zelgius.com.lights.repository.ILight
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 
 class GroupRepositoryTest {
@@ -83,41 +84,6 @@ class GroupRepositoryTest {
     }
 
     private lateinit var groups: List<Group>
-    @Test
-    fun getPagedGroup() {
-        groups = (1..10)
-            .map { createSample(name = "Test $it") }
-            .sortedBy { it.name }
-
-        runBlocking {
-            groups.forEach { repository.createOrUpdate(it) }
-        }
-        // At first starting DataSource with no paged group
-        val factory = repository.getGroupDataSource()
-        val latch = CountDownLatch(1)
-
-
-        val observer = TestObserver<PagedList<Group>> {
-            if (!it.isEmpty()) {
-                assertEquals(5, it.size)
-                assertTrue(groups.containsAll(it))
-                assertTrue(groups.subList(0, 5).containsAll(it))
-                latch.countDown()
-            }
-        }
-
-        val pagedListConfig = PagedList.Config.Builder()
-            .setEnablePlaceholders(false)
-            .setInitialLoadSizeHint(5)
-            .setPageSize(5).build()
-        LivePagedListBuilder(factory, pagedListConfig)
-            .build()
-            .observe(observer, observer)
-
-        latch.await(5, TimeUnit.SECONDS)
-        observer.stopObserving()
-        assertEquals(0, latch.count)
-    }
 
     @Test
     fun getPagedGroupFlatted() {
@@ -207,6 +173,32 @@ class GroupRepositoryTest {
             items = listOf(*s.toTypedArray(), *l.toTypedArray())
         }
 
+    @Test
+    fun findCrossCollection() {
+        runBlocking {
+            val groups = (1 .. 5).map{
+                createSample(name = "Test $it").also {g ->
+                    repository.createOrUpdate(g)
+                }
+            }
+
+            val group = groups[Random.nextInt(groups.size)]
+            val switch = group.switches.let {
+                it[Random.nextInt(it.size)]
+            }
+
+            val result = repository.getGroupFromSwitch(switch.uid)
+            with(result.find { group.name == it.name }) {
+                assertNotNull(this)
+
+                assertNotNull(this!!.switches.find { it.uid == switch.uid })
+            }
+
+            groups.forEach {
+                repository.delete(it)
+            }
+        }
+    }
 
     class TestObserver<T>(private val handler: (T) -> Unit) : Observer<T>, LifecycleOwner {
         private val lifecycle = LifecycleRegistry(this)

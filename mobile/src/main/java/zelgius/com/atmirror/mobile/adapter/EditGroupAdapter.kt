@@ -4,24 +4,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.TextView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
-import org.jetbrains.annotations.NotNull
 import zelgius.com.atmirror.mobile.R
-import zelgius.com.atmirror.mobile.context
-import zelgius.com.atmirror.mobile.databinding.*
+import zelgius.com.atmirror.mobile.databinding.AdapterLightEditBinding
+import zelgius.com.atmirror.mobile.databinding.AdapterSwitchBinding
 import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.repository.FirestoreGroupItemMapper
 import zelgius.com.lights.repository.ILight
 import zelgius.com.swipetodelete.SwipeToDeleteFirestorePagedAdapter
-import zelgius.com.utils.dpToPx
+import zelgius.com.view_helper_extensions.context
 
 class EditGroupAdapter(
     options: FirestorePagingOptions<GroupItem>,
@@ -72,7 +69,6 @@ class EditGroupAdapter(
     }
 
     override fun onBindViewHolder(holder: BindableViewHolder<*>, position: Int, model: GroupItem) {
-        if (model != null) {
             when (holder) {
 
                 is SwitchViewHolder -> (model as Switch).let {
@@ -83,8 +79,6 @@ class EditGroupAdapter(
                     holder.bind(it)
                 }
             }
-        }
-
     }
 
     override fun getData(position: Int): GroupItem? {

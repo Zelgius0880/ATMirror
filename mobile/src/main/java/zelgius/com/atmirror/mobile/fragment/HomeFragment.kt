@@ -7,18 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
+import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.GroupAdapter
 import zelgius.com.atmirror.mobile.databinding.*
 import zelgius.com.atmirror.mobile.dialog.AddGroupDialog
-import zelgius.com.atmirror.mobile.snackBar
 import zelgius.com.atmirror.mobile.viewModel.EditViewModel
 import zelgius.com.atmirror.mobile.viewModel.HomeViewModel
 import zelgius.com.atmirror.shared.entity.Group
-import zelgius.com.atmirror.shared.protocol.CurrentStatus
-import zelgius.com.atmirror.shared.viewModel.PhoneNetworkViewModel
 import zelgius.com.utils.ViewModelHelper
-import zelgius.com.utils.observe
+import zelgius.com.view_helper_extensions.snackBar
 
 class HomeFragment : Fragment() {
 

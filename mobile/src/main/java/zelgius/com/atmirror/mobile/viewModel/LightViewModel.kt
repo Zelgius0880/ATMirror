@@ -1,17 +1,10 @@
 package zelgius.com.atmirror.mobile.viewModel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.entity.Light
-import zelgius.com.atmirror.shared.repository.FirebaseRepository
 import zelgius.com.atmirror.shared.repository.LightRepository
-import zelgius.com.atmirror.shared.repository.NetworkRepository
-import zelgius.com.lights.repository.ILight
-import zelgius.com.lights.repository.LIFXService
 
 class LightViewModel(app: Application) : AndroidViewModel(app) {
     private val _lifxKey = MutableLiveData<String>()
@@ -36,16 +29,17 @@ class LightViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun fetchLIFXList(): LiveData<Boolean> {
-        val result = MutableLiveData<Boolean> ()
+        val result = MutableLiveData<Boolean>()
         viewModelScope.launch {
             with(repository.getLIFXList()) {
-                if(this == null) result.value = false
+                if (this == null) result.value = false
                 else {
                     _listLights.value = map {
                         Light(
                             name = it.name,
-                            uid = it.uid,
-                            type = it.type
+                            uid = it.id,
+                            type = it.type,
+                            productName = it.productName
                         )
                     }
 
@@ -56,6 +50,26 @@ class LightViewModel(app: Application) : AndroidViewModel(app) {
 
         return result
     }
+
+    fun fetchHueList() = liveData {
+
+        with(repository.getHueList()) {
+            if (this == null) emit(false)
+            else {
+                _listLights.value = map {
+                    Light(
+                        name = it.name,
+                        uid = it.id,
+                        type = it.type,
+                        productName = it.productName
+                    )
+                }
+
+                emit(true)
+            }
+        }
+    }
+
 
     override fun onCleared() {
         super.onCleared()

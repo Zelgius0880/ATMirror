@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".fragment.HomeFragment">
+
+
+    <ImageView
+            android:id="@+id/hue_bridge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_hue_bidge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title" />
+
+    <com.rodolfonavalon.shaperipplelibrary.ShapeRipple
+            android:id="@+id/shapeRipple"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:enable_single_ripple="true"
+            app:enable_stroke_style="true"
+            app:layout_constraintBottom_toBottomOf="@+id/hue_bridge"
+            app:layout_constraintEnd_toEndOf="@+id/hue_bridge"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/hue_bridge"
+            app:layout_constraintTop_toTopOf="@+id/hue_bridge"
+            app:layout_constraintVertical_bias="0.0"
+            app:ripple_color="#2196f3"
+            app:ripple_duration="1000" />
+
+    <ImageView
+            android:id="@+id/hue_bridge_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_hue_bidge_button_only"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/hue_bridge"
+            app:layout_constraintEnd_toEndOf="@+id/hue_bridge"
+            app:layout_constraintStart_toStartOf="@+id/hue_bridge"
+            app:layout_constraintTop_toTopOf="@+id/hue_bridge"
+            app:layout_constraintVertical_bias="0.332" />
+
+    <com.google.android.material.button.MaterialButton
+            android:id="@+id/check"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/pressed"
+            app:icon="@drawable/ic_baseline_done_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barrier3" />
+
+    <TextView
+            android:id="@+id/comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/press_hue_bridge"
+            app:layout_constraintBottom_toBottomOf="@+id/check"
+            app:layout_constraintEnd_toStartOf="@+id/check"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barrier3" />
+
+    <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:text="TextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+            android:id="@+id/ok"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:src="@drawable/ic_baseline_done_24"
+            android:tint="@color/colorOk"
+            android:visibility="gone"
+            app:layout_constraintDimensionRatio="w,1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            tools:visibility="visible" />
+
+    <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/comment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="ok,hue_bridge"
+            tools:layout_editor_absoluteY="785dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

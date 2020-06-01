@@ -5,14 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.databinding.DialogLifxConfigBinding
-import zelgius.com.atmirror.mobile.text
 import zelgius.com.atmirror.mobile.viewModel.LightViewModel
-import zelgius.com.atmirror.shared.viewModel.PhoneNetworkViewModel
+import zelgius.com.dialogextensions.setListeners
 import zelgius.com.utils.ViewModelHelper
-import zelgius.com.utils.observe
-import zelgius.com.utils.setListeners
+import zelgius.com.view_helper_extensions.text
 
 class LIFXConfigDialog : DialogFragment() {
     private var _binding: DialogLifxConfigBinding? = null
@@ -33,7 +32,7 @@ class LIFXConfigDialog : DialogFragment() {
             .setPositiveButton(R.string.save, null)
             .setNegativeButton(R.string.cancel, null)
             .create()
-            .setListeners ({
+            .setListeners  ({
                 if (binding.key.text.isNullOrEmpty()) {
                     binding.key.error = getString(R.string.field_requied)
                     false

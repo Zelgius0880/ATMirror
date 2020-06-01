@@ -17,7 +17,8 @@ data class Light(
     @get:Exclude
     @set:Exclude
     var state: State = State.TOGGLE,
-
+    @get:Exclude
+    override val productName: String = "",
     @get:Exclude
     @set:Exclude
     public override  var group: Group? = null,

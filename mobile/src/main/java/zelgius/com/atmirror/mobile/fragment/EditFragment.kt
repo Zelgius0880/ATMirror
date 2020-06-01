@@ -6,16 +6,16 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.firebase.ui.firestore.paging.LoadingState
 import com.google.android.material.snackbar.Snackbar
+import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.EditGroupAdapter
 import zelgius.com.atmirror.mobile.databinding.FragmentEditBinding
 import zelgius.com.atmirror.mobile.dialog.AddSwitchDialog
-import zelgius.com.atmirror.mobile.hideKeyboard
-import zelgius.com.atmirror.mobile.text
 import zelgius.com.atmirror.mobile.viewModel.EditViewModel
 import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.utils.ViewModelHelper
-import zelgius.com.utils.observe
+import zelgius.com.view_helper_extensions.hideKeyboard
+import zelgius.com.view_helper_extensions.text
 
 class EditFragment : Fragment() {
 
@@ -32,19 +32,18 @@ class EditFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
-        setHasOptionsMenu(true)
-    }
+        }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentEditBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+        override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            _binding = FragmentEditBinding.inflate(inflater, container, false)
+            return binding.root
+        }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
 
         adapter = EditGroupAdapter(
             editViewModel.getItems(),
@@ -149,9 +148,6 @@ class EditFragment : Fragment() {
             .show()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_delete, menu)
-    }
 
     override fun onStart() {
         super.onStart()

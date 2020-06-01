@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import zelgius.com.atmirror.shared.entity.FirebaseObject
+import zelgius.com.atmirror.shared.entity.State
 import zelgius.com.atmirror.shared.entity.Switch
 
 class NetworkRepository(
@@ -45,8 +46,7 @@ class NetworkRepository(
             createOrUpdate(StateElement(key = path, state = State.NOT_WORKING), "states")
         }
 
-    suspend fun sendSwitch(switch: Switch?) =
-        withContext(Dispatchers.Default) {
+    suspend fun sendSwitch(switch: Switch?) {
 
             if(switch != null) {
                 switch.key = "lastKnownSwitch"
@@ -63,7 +63,8 @@ class NetworkRepository(
         @get:Exclude
         @set:Exclude
         override var key: String?,
-        val state: State) : FirebaseObject
+        val state: State
+    ) : FirebaseObject
 
     fun removeListeners() {
         phoneListenerRegistration?.remove()

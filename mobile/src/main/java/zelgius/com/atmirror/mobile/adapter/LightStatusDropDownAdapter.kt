@@ -7,7 +7,7 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.shared.entity.Light
-import zelgius.com.utils.dpToPx
+import zelgius.com.contextextensions.dpToPx
 
 class LightStatusDropDownAdapter(context: Context) : ArrayAdapter<Light.State>(
     context,

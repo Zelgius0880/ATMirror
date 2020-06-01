@@ -61,7 +61,7 @@ class SHT21SensorDriver(bus: String, address: Int = I2C_ADDRESS) : AutoCloseable
 
 
     init {
-        Log.e(TAG, " Addresses ${PeripheralManager.getInstance().scanI2cAvailableAddresses(bus)}")
+        //Log.e(TAG, " Addresses ${PeripheralManager.getInstance().scanI2cAvailableAddresses(bus)}")
         mDevice = SHT21(bus, address)
     }
     /**

@@ -14,8 +14,6 @@
                  android:hardwareAccelerated="true">
         <uses-library android:name="com.google.android.things"/>
 
-        <service android:name="zelgius.com.atmirror.shared.service.NetworkService" />
-
         <activity
                 android:name=".MainActivity"
                 android:theme="@style/AppTheme.NoActionBar">

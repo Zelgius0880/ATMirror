@@ -32,6 +32,17 @@
     <string name="fect_lifx_failed">Cannot fetch LIFX lights</string>
     <string name="light_saved">Light Saved</string>
     <string name="add_group">Add group</string>
+    <string name="press_hue_bridge">Press on the button of the HUE bridge</string>
+    <string name="pressed">Pressed</string>
+    <string name="configure_hue">Configure HUE</string>
+    <string name="hue_not_configured">Phillips Hue is not configured yet, or there is a problem with the settings</string>
+    <string name="hue_phone_not_configured">The phone is not configured for Phillips Hue</string>
+    <string name="hue_mirror_not_configured">The mirror is not configured for Phillips Hue</string>
+    <string name="hue_all_devices_registered">All devices are configured for Phillips Hue</string>
+    <string name="register_failed">Failed to register the devices</string>
+    <string name="home_fragment">Home</string>
+    <string name="edit_fragment">Edit Group</string>
+    <string name="add_light_fragment">Add a light</string>
 
     <plurals name="light_not_saved">
         <item quantity="one" formatted="true">the light not save (it probably already exists)</item>

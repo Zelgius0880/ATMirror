@@ -6,21 +6,20 @@ import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.BindableViewHolder
 import zelgius.com.atmirror.mobile.databinding.AdapterHeaderBinding
 import zelgius.com.atmirror.mobile.databinding.AdapterLightAddBinding
-import zelgius.com.atmirror.mobile.databinding.AdapterLightBinding
 import zelgius.com.atmirror.mobile.databinding.FragmentAddLightBinding
+import zelgius.com.atmirror.mobile.dialog.HueConfigDialog
 import zelgius.com.atmirror.mobile.dialog.LIFXConfigDialog
-import zelgius.com.atmirror.mobile.snackBar
 import zelgius.com.atmirror.mobile.viewModel.EditViewModel
 import zelgius.com.atmirror.mobile.viewModel.LightViewModel
 import zelgius.com.atmirror.shared.entity.Light
-import zelgius.com.atmirror.shared.viewModel.PhoneNetworkViewModel
 import zelgius.com.lights.repository.ILight
 import zelgius.com.utils.ViewModelHelper
-import zelgius.com.utils.observe
+import zelgius.com.view_helper_extensions.snackBar
 
 class AddLightFragment : Fragment() {
     private var _binding: FragmentAddLightBinding? = null
@@ -79,14 +78,20 @@ class AddLightFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId) {
+        return when (item.itemId) {
             R.id.save -> {
                 saveMenu.actionView = ProgressBar(requireContext())
                 editViewModel.save(list).observe(this) {
                     saveMenu.actionView = null
                     findNavController().navigateUp()
-                    if(it.isNotEmpty())
-                        snackBar(resources.getQuantityString(R.plurals.light_not_saved, it.size, it.size))
+                    if (it.isNotEmpty())
+                        snackBar(
+                            resources.getQuantityString(
+                                R.plurals.light_not_saved,
+                                it.size,
+                                it.size
+                            )
+                        )
                     else
                         snackBar(getString(R.string.light_saved))
                 }
@@ -107,6 +112,10 @@ class AddLightFragment : Fragment() {
                 lightViewModel.setLifxKey(it)
             }
         }.show(parentFragmentManager, "lifx_dialog")
+    }
+    private fun showHueDialog() {
+        HueConfigDialog().apply {
+        }.show(parentFragmentManager, "hue_dialog")
     }
 
     inner class Adapter : RecyclerView.Adapter<BindableViewHolder<*>>() {
@@ -161,6 +170,10 @@ class AddLightFragment : Fragment() {
                 showLIFXDialog()
             }
 
+            binding.settingHue.setOnClickListener {
+                showHueDialog()
+            }
+
             binding.listLifx.setOnClickListener {
                 this@AddLightFragment.binding.progressBar.visibility = View.VISIBLE
                 lightViewModel.fetchLIFXList().observe(this@AddLightFragment) {
@@ -169,9 +182,19 @@ class AddLightFragment : Fragment() {
                         snackBar(
                             text = getString(R.string.fect_lifx_failed),
                             actionText = getString(R.string.settings)
-                        ) {
-                            showLIFXDialog()
-                        }
+                        ) { showLIFXDialog() }
+                }
+            }
+
+            binding.listHue.setOnClickListener {
+                this@AddLightFragment.binding.progressBar.visibility = View.VISIBLE
+                lightViewModel.fetchHueList().observe(this@AddLightFragment) {
+                    this@AddLightFragment.binding.progressBar.visibility = View.GONE
+                    if (!it)
+                        snackBar(
+                            text = getString(R.string.fect_lifx_failed),
+                            actionText = getString(R.string.settings)
+                        ) { showLIFXDialog() }
                 }
             }
         }
@@ -182,7 +205,7 @@ class AddLightFragment : Fragment() {
         BindableViewHolder<Light>(binder.root) {
         override fun bind(item: Light) {
             binder.name.text = item.name
-            binder.uid.text = item.uid
+            binder.uid.text = item.productName
 
             binder.type.setText(
                 when (item.type) {

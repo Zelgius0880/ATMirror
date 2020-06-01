@@ -1,6 +1,5 @@
 package zelgius.com.atmirror.shared.repository
 
-import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
@@ -8,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import zelgius.com.atmirror.shared.entity.FirebaseObject
-import java.lang.IllegalStateException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -22,14 +20,9 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
     }
     private val auth = FirebaseAuth.getInstance()
 
-    suspend fun db()=
-        withContext(Dispatchers.Default){
-            checkLogin()
-            db
-        }
-
-    init {
-
+    suspend fun db(): FirebaseFirestore {
+        checkLogin()
+        return db
     }
 
     /**
@@ -47,37 +40,36 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
         size: Long,
         objClass: Class<T>,
         order: String? = null
-    ) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            suspendCoroutine<List<T>> { continuation ->
-                db.collection(path)
-                    .let {
-                        if (order != null) {
-                            it.orderBy(order)
-                        } else it
+    ): List<T> {
+        checkLogin()
+        return suspendCoroutine { continuation ->
+            db.collection(path)
+                .let {
+                    if (order != null) {
+                        it.orderBy(order)
+                    } else it
+                }
+                .startAfter(snapshot)
+                .limit(size)
+                .addSnapshotListener { snapshots, e ->
+                    if (e != null) {
+                        continuation.resumeWithException(e)
                     }
-                    .startAfter(snapshot)
-                    .limit(size)
-                    .addSnapshotListener { snapshots, e ->
-                        if (e != null) {
-                            continuation.resumeWithException(e)
-                        }
 
-                        if (snapshots != null) {
-                            val list: MutableList<T> = ArrayList()
-                            for (doc in snapshots.documents) {
-                                doc.toObject(objClass)?.apply {
-                                    list.add(this)
-                                }
+                    if (snapshots != null) {
+                        val list: MutableList<T> = ArrayList()
+                        for (doc in snapshots.documents) {
+                            doc.toObject(objClass)?.apply {
+                                list.add(this)
                             }
-
-                            if (continuation.context.isActive)
-                                continuation.resume(list)
                         }
+
+                        if (continuation.context.isActive)
+                            continuation.resume(list)
                     }
-            }
+                }
         }
+    }
 
     /**
      * See [getPaged]
@@ -92,51 +84,49 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
         size: Long,
         objClass: Class<T>,
         order: String? = null
-    ) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            suspendCoroutine<List<T>> { continuation ->
-                db.collection(path)
-                    .limit(size)
-                    .let {
-                        if (order != null) {
-                            it.orderBy(order)
-                        } else it
-                    }
-                    .get()
-                    .addOnSuccessListener {
-                        /* val list: MutableList<T> = //snapshots.toObjects(objClass)
-                     ArrayList()
-                     for (doc in snapshots.documents) {
-                         doc.toObject(objClass)?.apply {
-                             list.add(this)
-                         }
+    ): List<T> {
+        checkLogin()
+        return suspendCoroutine { continuation ->
+            db.collection(path)
+                .limit(size)
+                .let {
+                    if (order != null) {
+                        it.orderBy(order)
+                    } else it
+                }
+                .get()
+                .addOnSuccessListener {
+                    /* val list: MutableList<T> = //snapshots.toObjects(objClass)
+                 ArrayList()
+                 for (doc in snapshots.documents) {
+                     doc.toObject(objClass)?.apply {
+                         list.add(this)
                      }
+                 }
 
-                     continuation.resume(list)*/
-                        continuation.resume(it.toObjects(objClass))
-                    }
-                    .addOnFailureListener {
-                        continuation.resumeWithException(it)
-                    }
-            }
+                 continuation.resume(list)*/
+                    continuation.resume(it.toObjects(objClass))
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
         }
+    }
 
-    protected suspend fun getSnapshot(firebaseObject: FirebaseObject) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            suspendCoroutine<DocumentSnapshot> { continuation ->
-                db.collection(firebaseObject.firebasePath)
-                    .document(firebaseObject.key!!)
-                    .get()
-                    .addOnSuccessListener {
-                        continuation.resume(it)
-                    }
-                    .addOnFailureListener {
-                        continuation.resumeWithException(it)
-                    }
-            }
+    protected suspend fun getSnapshot(firebaseObject: FirebaseObject): DocumentSnapshot {
+        checkLogin()
+        return suspendCoroutine { continuation ->
+            db.collection(firebaseObject.firebasePath)
+                .document(firebaseObject.key!!)
+                .get()
+                .addOnSuccessListener {
+                    continuation.resume(it)
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
         }
+    }
 
     /**
      * Retrieve a [QuerySnapshot] from [parent] parent. [path] is the full path of the collection -> {parent.path}/{collection}
@@ -148,33 +138,32 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
         parent: FirebaseObject,
         path: String,
         vararg order: String
-    ) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            suspendCoroutine<QuerySnapshot> { continuation ->
-                db.collection(parent.firebasePath)
-                    .document(parent.key!!)
-                    .collection(path.replace("${parent.firebasePath}/", ""))
-                    .run {
-                        if (order.isNotEmpty()) {
-                            var query: Query? = null
-                            order.forEach {
-                                query = if (query == null) orderBy(it)
-                                else query!!.orderBy(it)
-                            }
-                            query!!
-                        } else
-                            this
-                    }
-                    .get()
-                    .addOnSuccessListener {
-                        continuation.resume(it)
-                    }
-                    .addOnFailureListener {
-                        continuation.resumeWithException(it)
-                    }
-            }
+    ): QuerySnapshot {
+        checkLogin()
+        return suspendCoroutine { continuation ->
+            db.collection(parent.firebasePath)
+                .document(parent.key!!)
+                .collection(path.replace("${parent.firebasePath}/", ""))
+                .run {
+                    if (order.isNotEmpty()) {
+                        var query: Query? = null
+                        order.forEach {
+                            query = if (query == null) orderBy(it)
+                            else query!!.orderBy(it)
+                        }
+                        query!!
+                    } else
+                        this
+                }
+                .get()
+                .addOnSuccessListener {
+                    continuation.resume(it)
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
         }
+    }
 
     /**
      * Retrieve a [QuerySnapshot] from [parent] parent. [path] is the full path of the collection -> {parent.path}/{collection}
@@ -187,50 +176,47 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
         path: String,
         clazz: Class<T>,
         vararg order: String
-    ): List<T> =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            mutableListOf<T>().apply {
-                getSubListSnapshot(parent, path, *order).forEach { document ->
-                    document.toObject(clazz).let {
-                        it.key = document.id
-                        add(it)
-                    }
+    ): List<T> {
+        checkLogin()
+        return mutableListOf<T>().apply {
+            getSubListSnapshot(parent, path, *order).forEach { document ->
+                document.toObject(clazz).let {
+                    it.key = document.id
+                    add(it)
                 }
             }
         }
+    }
 
-    suspend fun getSnapshot(key: String, path: String) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            suspendCoroutine<DocumentSnapshot> { continuation ->
-                db.collection(path)
-                    .document(key)
-                    .get()
-                    .addOnSuccessListener {
-                        continuation.resume(it)
-                    }
-                    .addOnFailureListener {
-                        continuation.resumeWithException(it)
-                    }
-            }
+    suspend fun getSnapshot(key: String, path: String): DocumentSnapshot {
+        checkLogin()
+        return suspendCoroutine { continuation ->
+            db.collection(path)
+                .document(key)
+                .get()
+                .addOnSuccessListener {
+                    continuation.resume(it)
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
         }
+    }
 
 
     suspend fun listen(
         key: String,
         path: String,
         listener: (DocumentSnapshot?, FirebaseFirestoreException?) -> Unit
-    ) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            db.collection(path)
-                .document(key)
-                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-                    if(documentSnapshot != null)
-                        listener(documentSnapshot, firebaseFirestoreException)
-                }
-        }
+    ): ListenerRegistration {
+        checkLogin()
+        return db.collection(path)
+            .document(key)
+            .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                if (documentSnapshot != null)
+                    listener(documentSnapshot, firebaseFirestoreException)
+            }
+    }
 
 
     class AlreadyExistsException(string: String) : IllegalStateException(string)
@@ -239,78 +225,74 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
         item: T,
         path: String,
         checkUnique: Pair<String, Any>? = null
-    ) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            if (checkUnique != null && !checkIfNotExists(
-                    path,
-                    checkUnique
-                )
-            ) throw AlreadyExistsException("$checkUnique already exists in the collection $path")
-            else
-                suspendCoroutine<T> { continuation ->
-                    db.collection(path)
-                        .run {
-                            if (item.key != null) {
-                                document(item.key!!)
-                            } else {
-                                document()
-                            }
-                        }.apply {
-                            set(item)
-                                .addOnSuccessListener {
-                                    item.key = id
-                                    continuation.resume(item)
-                                }
-                                .addOnFailureListener {
-                                    continuation.resumeWithException(it)
-                                }
+    ): T {
+        checkLogin()
+        if (checkUnique != null && !checkIfNotExists(
+                path,
+                checkUnique
+            )
+        ) throw AlreadyExistsException("$checkUnique already exists in the collection $path")
+        else
+            return suspendCoroutine { continuation ->
+                db.collection(path)
+                    .run {
+                        if (item.key != null) {
+                            document(item.key!!)
+                        } else {
+                            document()
                         }
-                }
-        }
+                    }.apply {
+                        set(item)
+                            .addOnSuccessListener {
+                                item.key = id
+                                continuation.resume(item)
+                            }
+                            .addOnFailureListener {
+                                continuation.resumeWithException(it)
+                            }
+                    }
+            }
+    }
 
     private suspend fun checkIfNotExists(
         path: String,
         checkUnique: Pair<String, Any>
-    ) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            suspendCoroutine<Boolean> { continuation ->
-                db.collection(path)
-                    .whereEqualTo(checkUnique.first, checkUnique.second)
-                    .get()
-                    .addOnSuccessListener {
-                        continuation.resume(it.isEmpty)
-                    }
-                    .addOnFailureListener {
-                        continuation.resumeWithException(it)
-                    }
-            }
+    ): Boolean {
+        checkLogin()
+        return suspendCoroutine { continuation ->
+            db.collection(path)
+                .whereEqualTo(checkUnique.first, checkUnique.second)
+                .get()
+                .addOnSuccessListener {
+                    continuation.resume(it.isEmpty)
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
         }
+    }
 
-    suspend fun <T : FirebaseObject> delete(item: T, path: String) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            delete(item.key!!, path)
-            item
-        }
+    suspend fun <T : FirebaseObject> delete(item: T, path: String): T {
+        checkLogin()
+        delete(item.key!!, path)
+        return item
+    }
 
 
-    suspend fun delete(key: String, path: String) =
-        withContext(Dispatchers.Default) {
-            checkLogin()
-            suspendCoroutine<Boolean> { continuation ->
-                db.collection(path)
-                    .document(key)
-                    .delete()
-                    .addOnSuccessListener {
-                        continuation.resume(true)
-                    }
-                    .addOnFailureListener {
-                        continuation.resumeWithException(it)
-                    }
-            }
+    suspend fun delete(key: String, path: String): Boolean {
+        checkLogin()
+        return suspendCoroutine { continuation ->
+            db.collection(path)
+                .document(key)
+                .delete()
+                .addOnSuccessListener {
+                    continuation.resume(true)
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
         }
+    }
 
 
     private suspend fun checkLogin() =
@@ -330,5 +312,20 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
                 }
             } else auth.currentUser!!
         } else null
+
+    suspend fun findCrossCollection(field: String, key: String, path: String): QuerySnapshot {
+        val db = db()
+        return suspendCoroutine { continuation ->
+                db.collectionGroup(path)
+                    .whereEqualTo(field, key)
+                    .get()
+                    .addOnSuccessListener {
+                        continuation.resume(it)
+                    }
+                    .addOnFailureListener {
+                        continuation.resumeWithException(it)
+                    }
+            }
+        }
 
 }

@@ -2,9 +2,10 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="ATMirror.extensions" target="1.8" />
       <module name="ATMirror.lights" target="1.7" />
       <module name="ATMirror.mobile" target="1.7" />
-      <module name="ATMirror.shared" target="1.7" />
+      <module name="ATMirror.shared" target="1.8" />
       <module name="ATMirror.sharedThing" target="1.8" />
       <module name="ATMirror.swipeToDelete" target="1.7" />
       <module name="ATMirror.testapp" target="1.8" />

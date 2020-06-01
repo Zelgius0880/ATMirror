@@ -15,8 +15,8 @@ import com.jjoe64.graphview.series.LineGraphSeries
 import khronos.Dates
 import kotlinx.android.synthetic.main.fragment_perssure.*
 import kotlinx.android.synthetic.main.fragment_perssure.graphView
-import zelgius.com.utils.getColor
 import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
+import zelgius.com.contextextensions.getColor
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -67,7 +67,6 @@ abstract class SharedPressureFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         viewModel.piclockCurrentRecord.observe(this, Observer {
 
             //Convert pressure to the equivalent at see level

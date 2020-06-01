@@ -8,13 +8,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.entity.Switch
-import zelgius.com.atmirror.shared.protocol.CurrentStatus
-import zelgius.com.atmirror.shared.protocol.GetCurrentStatus
-import zelgius.com.atmirror.shared.protocol.StartDiscovery
-import zelgius.com.atmirror.shared.protocol.StopDiscovery
 import zelgius.com.atmirror.shared.repository.NetworkRepository
-import zelgius.com.atmirror.shared.repository.State
-import zelgius.com.lights.repository.LIFXService
+import zelgius.com.atmirror.shared.entity.State
 
 class PhoneNetworkViewModel(val app: Application) : AndroidViewModel(app) {
     private val _status = MutableLiveData(State.NOT_WORKING)

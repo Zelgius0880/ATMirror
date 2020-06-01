@@ -29,15 +29,6 @@ fun Double.round(decimals: Int): Double {
     return round(this * multiplier) / multiplier
 }
 
-fun Context.getColor(@ColorRes color: Int, alpha: Float) =
-    getColor(color).let{
-        Color.argb(
-            (Color.alpha(color) * alpha).roundToInt(),
-            Color.red(it),
-            Color.green(it),
-            Color.blue(it))
-    }
-
 
 fun ByteArray.toHexString(): String {
     val sb = StringBuilder(size * 2)
@@ -55,42 +46,8 @@ fun String.hexStringToByteArray() : ByteArray {
         val secondIndex = HEX_CHARS.indexOf(this[i + 1]);
 
         val octet = firstIndex.shl(4).or(secondIndex)
-        result.set(i.shr(1), octet.toByte())
+        result[i.shr(1)] = octet.toByte()
     }
 
     return result
-}
-
-/**
- *
- * Get the value of dp to Pixel according to density of the screen
- *
- * @receiver Context
- * @param dp Float      the value in dp
- * @return the value of dp to Pixel according to density of the screen
- */
-fun Context.dpToPx(dp: Float) =
-    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics)
-
-fun <T> LiveData<T>.observe(lifecycleOwner: LifecycleOwner, work: (T) -> Unit) {
-    observe(lifecycleOwner, Observer {
-        work(it)
-    })
-}
-
-fun AlertDialog.setListeners(positiveListener: (() -> Boolean)? = null, negativeListener: (() -> Boolean)? = null): AlertDialog {
-
-    setOnShowListener {
-        getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            if (positiveListener == null) dismiss()
-            else if (positiveListener()) dismiss()
-        }
-
-        getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
-            if (negativeListener == null) dismiss()
-            else if (negativeListener()) dismiss()
-        }
-    }
-
-    return this
 }
