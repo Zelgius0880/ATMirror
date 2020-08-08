@@ -19,8 +19,8 @@ android {
         testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = mutableMapOf("room.schemaLocation" to "$projectDir/schemas")
+            kaptOptions {
+                arguments (mutableMapOf("room.schemaLocation" to "$projectDir/schemas"))
             }
         }
     }
@@ -61,7 +61,6 @@ android {
 dependencies {
     implementation (project(path = ":utils"))
     implementation (project(path = ":sharedThing"))
-    implementation (project(":shared"))
     val lifecycleVersion = "2.2.0-alpha01"
 
     implementation (fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))

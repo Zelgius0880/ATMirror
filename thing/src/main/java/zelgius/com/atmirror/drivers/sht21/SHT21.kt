@@ -64,7 +64,7 @@ class SHT21(i2cName: String, address: Int = 0x60) {
      * @param buffer containing two bytes (humidity raw value, 16bit scaled)
      * @return relative humidity [%RH]
      */
-    @kotlin.ExperimentalUnsignedTypes
+    @OptIn(ExperimentalUnsignedTypes::class)
     fun calcRH(buffer: ByteBuffer): Float {
         /*var sRH = (buffer.get(0).toUInt() and 0xFF.toUInt())
 
@@ -261,11 +261,11 @@ class SHT21(i2cName: String, address: Int = 0x60) {
 
         } catch (exception: IOException) {
             Log.e("Temperature measurement failed because of an IOException: ", exception.message?:"no message")
+            exception.printStackTrace()
             return Float.MIN_VALUE
         }
     }
 
-    @UseExperimental(ExperimentalUnsignedTypes::class)
     private fun measurePollHumidity(): Float {
         //this.softReset()
         try {

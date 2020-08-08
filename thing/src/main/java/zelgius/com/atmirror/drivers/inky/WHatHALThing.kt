@@ -1,0 +1,125 @@
+package zelgius.com.atmirror.drivers.inky
+
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.util.Log
+import com.google.android.things.pio.Gpio
+import com.google.android.things.pio.SpiDevice
+import com.zelgius.driver.eink.InkyColor
+import com.zelgius.driver.eink.WHatHAL
+import com.zelgius.driver.eink.rotate
+import kotlinx.coroutines.delay
+import java.io.IOException
+import java.nio.ByteBuffer
+
+val TAG = WHatHALThing::class.simpleName
+
+class WHatHALThing(
+    private val cs: Gpio,
+    private val dc: Gpio,
+    private val reset: Gpio,
+    private val busy: Gpio,
+    private val spi: SpiDevice,
+    color: InkyColor = InkyColor.RED_HT
+) : WHatHAL(color = color) {
+
+    init {
+        writeChipSelect(false)
+    }
+
+    override fun readBusy(): Boolean = busy.value
+
+    override fun writeReset(high: Boolean) {
+        reset.value = high
+    }
+
+    override fun writeDC(high: Boolean) {
+        dc.value = high
+    }
+
+    override fun writeChipSelect(high: Boolean) {
+        cs.value = high
+    }
+
+    override fun writeSpi(value: Int) {
+        writeChipSelect(true)
+        spi.write(byteArrayOf(value.toByte()), 1)
+        writeChipSelect(false)
+    }
+
+    override fun writeSpi(value: IntArray) {
+        val buffer = ByteBuffer.wrap(value.map { it.toByte() }.toByteArray())
+        writeChipSelect(true)
+        while (buffer.remaining() > 0) {
+            with(ByteArray(1024)) {
+                val get = kotlin.math.min(buffer.remaining(), 1024)
+                buffer.get(this, 0, get)
+                spi.write(this, get)
+
+            }
+        }
+        writeChipSelect(false)
+    }
+
+    suspend fun setImage(image: Bitmap, rotation: Int? = null) {
+
+        val array = Array(image.height) { IntArray(image.width) }
+        for (i in 0 until image.height) {
+            for (j in 0 until image.width) {
+                val p = image.getPixel(j, i)
+                array[i][j] = when {
+                    Color.red(p) == 255 && Color.green(p) == 0 && Color.blue(p) == 0 -> InkyColor.RED.code
+                    Color.red(p) == 0 && Color.green(p) == 255 && Color.blue(p) == 255 -> InkyColor.YELLOW.code
+                    Color.red(p) == 0 && Color.green(p) == 0 && Color.blue(p) == 0 -> InkyColor.BLACK.code
+                    else -> InkyColor.WHITE.code
+                }
+            }
+        }
+
+        (if (rotation != null)
+            array.rotate(rotation)
+        else array)
+            .copyInto(buffer)
+        Log.e(TAG, buffer.flatMap { it.asList() }.distinct().joinToString())
+
+    }
+
+    override suspend fun show(wait: Boolean) {
+        super.show(wait)
+        delay(15000)
+
+    }
+
+    fun close() {
+        try {
+            cs.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        try {
+            busy.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        try {
+            reset.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        try {
+            dc.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        try {
+            spi.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+    }
+}

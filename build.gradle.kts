@@ -1,19 +1,17 @@
-import java.net.URI
-
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    val kotlinVersion by extra { "1.3.72" }
-    val kotlin_version by extra { "1.3.72" }
+    val kotlinVersion by extra { "1.4.0-rc" }
 
     repositories {
         google()
         jcenter()
         maven (url =  "https://dl.bintray.com/poldz123/maven/")
+        maven ( "https://dl.bintray.com/kotlin/kotlin-eap/" )
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:4.1.0-alpha09")
+        classpath("com.android.tools.build:gradle:4.2.0-alpha07")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("com.google.gms:google-services:4.3.3")
         classpath("com.google.firebase:firebase-plugins:2.0.0")
@@ -25,18 +23,14 @@ buildscript {
 
 allprojects {
     repositories {
-        flatDir {
-            dirs ("src/main/libs")
-        }
-
         google()
         jcenter()
         mavenCentral()
+        maven(url = "https://jitpack.io")
 
         maven("https://raw.githubusercontent.com/Zelgius0880/AndroidLibraries/master/releases")
-
+        maven ( "https://dl.bintray.com/kotlin/kotlin-eap/" )
     }
-
 
 }
 

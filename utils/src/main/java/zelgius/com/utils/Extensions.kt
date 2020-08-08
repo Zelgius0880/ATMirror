@@ -29,6 +29,12 @@ fun Double.round(decimals: Int): Double {
     return round(this * multiplier) / multiplier
 }
 
+fun Float.round(decimals: Int): Float {
+    var multiplier = 1.0f
+    repeat(decimals) { multiplier *= 10 }
+    return round(this * multiplier) / multiplier
+}
+
 
 fun ByteArray.toHexString(): String {
     val sb = StringBuilder(size * 2)

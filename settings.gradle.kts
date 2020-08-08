@@ -1,4 +1,3 @@
-include ':extensions'
 rootProject.buildFileName = "build.gradle.kts"
 
 include (":swipeToDelete")
@@ -6,6 +5,5 @@ include (":utils")
 include (":shared")
 include (":mobile")
 include (":thing")
-include (":testapp")
-include (":sharedThing")
 rootProject.name="ATMirror"
+include (":inky")
