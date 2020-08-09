@@ -72,22 +72,21 @@ class InkyViewModel(private val app: Application) : AndroidViewModel(app) {
                 while (true) {
                     val (s1, s2) = queue.receive()
 
-                    val task1 = if (s1 != lastS1 && s1 != null) {
+                    val task1 = if (s1 != lastS1 && s1 != null && s1.bitmap != null) {
                         async {
-                            inky1.setImage(s1.bitmap!!.rotate(-90f))
                             lastS1 = s1
+                            inky1.setImage(s1.bitmap!!.rotate(-90f))
                         }
                     } else null
 
-                    val task2 = if (s2 != lastS2 && s2 != null) async {
-                        inky2.setImage(s2.bitmap!!.rotate(90f))
+                    val task2 = if (s2 != lastS2 && s2 != null && s2.bitmap != null) async {
                         lastS2 = s2
+                        inky2.setImage(s2.bitmap!!.rotate(90f))
                     } else null
 
                     task1?.await()
                     task2?.await()
 
-                    Log.e(TAG, "$task1 $task2")
                     if (task1 != null) inky1.show(true)
                     if (task2 != null) inky2.show(true)
                 }

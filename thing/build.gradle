@@ -124,11 +124,9 @@ dependencies {
     def lifecycleVersion = "2.2.0"
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
-    kapt("androidx.lifecycle:lifecycle-runtime:$lifecycleVersion")
     kapt("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     // For Kotlin use kapt instead of kapt
     // alternately - if using Java8, use the following instead of lifecycle-compiler
-    implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
     def workVersion = "1.0.1"

@@ -61,7 +61,7 @@ class WHatHALThing(
         writeChipSelect(false)
     }
 
-    suspend fun setImage(image: Bitmap, rotation: Int? = null) {
+    fun setImage(image: Bitmap, rotation: Int? = null, default: InkyColor = InkyColor.WHITE) {
 
         val array = Array(image.height) { IntArray(image.width) }
         for (i in 0 until image.height) {
@@ -71,7 +71,8 @@ class WHatHALThing(
                     Color.red(p) == 255 && Color.green(p) == 0 && Color.blue(p) == 0 -> InkyColor.RED.code
                     Color.red(p) == 0 && Color.green(p) == 255 && Color.blue(p) == 255 -> InkyColor.YELLOW.code
                     Color.red(p) == 0 && Color.green(p) == 0 && Color.blue(p) == 0 -> InkyColor.BLACK.code
-                    else -> InkyColor.WHITE.code
+                    Color.red(p) == 255 && Color.green(p) == 255 && Color.blue(p) == 255 -> InkyColor.WHITE.code
+                    else -> default.code
                 }
             }
         }
@@ -80,7 +81,6 @@ class WHatHALThing(
             array.rotate(rotation)
         else array)
             .copyInto(buffer)
-        Log.e(TAG, buffer.flatMap { it.asList() }.distinct().joinToString())
 
     }
 

@@ -5,9 +5,26 @@ class DarkSky(
     var longitude: Double,
     var timezone: String,
     var daily: Forecast,
+    var currently: Forecast,
     var alerts: List<Alert>
 ) {
-    constructor() : this(0.0, 0.0, "", Forecast(), mutableListOf())
+    constructor() : this(0.0, 0.0, "", Forecast(), Forecast(), mutableListOf())
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DarkSky
+
+        if (currently != other.currently) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return currently.hashCode()
+    }
+
 }
 
 data class Forecast(
@@ -16,6 +33,8 @@ data class Forecast(
     var data: List<ForecastData>
 ) {
     constructor() : this("", "", mutableListOf())
+
+
 }
 
 class ForecastData(

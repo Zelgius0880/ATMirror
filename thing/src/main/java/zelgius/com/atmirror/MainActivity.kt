@@ -23,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import zelgius.com.atmirror.compose.Screen1
 import zelgius.com.atmirror.compose.Screen1View
 import zelgius.com.atmirror.compose.Screen2
+import zelgius.com.atmirror.compose.Screen2View
 import zelgius.com.atmirror.drivers.buzzer.Buzzer
 import zelgius.com.atmirror.drivers.buzzer.BuzzerAndroidThings
 import zelgius.com.atmirror.entities.SensorRecord
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private var s1: Screen1 = Screen1(null, null)
-    private var s2: Screen2 = Screen2(DarkSky())
+    private var s2: Screen2? = null
 
     private var lastUpdate: Long = 0
     private var mDevice: UartDevice? = null
@@ -69,25 +70,22 @@ class MainActivity : AppCompatActivity() {
         //setContentView(R.layout.activity_main)
         Stetho.initializeWithDefaults(this)
         setContent {
-            val stateTemperature: MutableState<Float?> = state{null}
-            val statePressure: MutableState<Int?> = state{null}
-            val stateHistory: MutableState<List<SensorRecord>> = state{ listOf()}
+            val stateTemperature: MutableState<Float?> = state { null }
+            val statePressure: MutableState<Int?> = state { null }
+            val stateHistory: MutableState<List<SensorRecord>> = state { listOf() }
+            val stateForecast: MutableState<DarkSky> = state { DarkSky() }
 
             Row(modifier = Modifier.size(600.dp, 400.dp)) {
                 Screen1View(
                     history = stateHistory,
                     temperature = stateTemperature,
-                    pressure =  statePressure
+                    pressure = statePressure
                 )
-                Screen1View(
-                    history = stateHistory,
-                    temperature = stateTemperature,
-                    pressure =  statePressure
-                )
+                Screen2View(stateForecast)
             }
 
             viewModel.sht21Record.observerAndUpdateScreen1(stateTemperature) {
-                if(it.temperature.toFloat().round(1) == stateTemperature.value?.round(1))
+                if (it.temperature.toFloat().round(1) == stateTemperature.value?.round(1))
                     null
                 else {
                     s1 = Screen1(s1.pressure, it.temperature.toFloat())
@@ -98,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             viewModel.piclockCurrentRecord.observerAndUpdateScreen1(statePressure) {
                 viewModel.updateLastKnownRecord(it)
 
-                if(it.pressure.roundToInt() == statePressure.value)
+                if (it.pressure.roundToInt() == statePressure.value)
                     null
                 else {
                     s1 = Screen1(it.pressure.toFloat(), s1.temperature)
@@ -106,7 +104,18 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            viewModel.forecastLiveData
+            viewModel.forecastLiveData.observe(this) {
+                stateForecast.value = it
+                s2 = Screen2(it)
+                rootView.postDelayed({
+                    bitmap = generateBitmap()
+                    s2?.bitmap = screen2
+                    inkyViewModel.display(
+                        screen1 = s1,
+                        screen2 = s2
+                    )
+                }, 500L)
+            }
         }
 
         mDevice = try {
@@ -127,10 +136,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.getRecordHistory(from = Dates.yesterday)
 
-        viewModel.forecastLiveData.observe(this){
-        }
-
-        viewModel.workerStatus.observe(this) {list ->
+        viewModel.workerStatus.observe(this) { list ->
             list.forEach {
 
                 when (it.state) {
@@ -141,30 +147,36 @@ class MainActivity : AppCompatActivity() {
                             viewModel.forecastLiveData.value = this
                         }
                     }
-                    else -> {}
+                    else -> {
+                    }
                 }
             }
         }
     }
 
-    private fun<T, S> LiveData<T>.observerAndUpdateScreen1(state: MutableState<S>, update: (T) -> S?) {
+    private fun <T, S> LiveData<T>.observerAndUpdateScreen1(
+        state: MutableState<S>,
+        update: (T) -> S?
+    ) {
         observe(context) {
-            with(update(it) ) {
-                if ( this != null && currentTimeStamp - lastUpdate >= 60 * 1000) {
-                state.value = this
-                rootView.postDelayed({
-                    bitmap = generateBitmap()
-                    inkyViewModel.display(
-                        screen1 = s1.apply { bitmap = screen1 }
-                    )
-                }, 500L)
-            }
+            with(update(it)) {
+                if (this != null && currentTimeStamp - lastUpdate >= 60 * 1000) {
+                    state.value = this
+                    rootView.postDelayed({
+                        bitmap = generateBitmap()
+                        inkyViewModel.display(
+                            screen1 = s1.apply { bitmap = screen1 },
+                            screen2 = s2.apply { bitmap = screen2 }
+
+                        )
+                    }, 500L)
+                }
             }
         }
     }
 
     private val currentTimeStamp
-    get() = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        get() = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     private lateinit var bitmap: Bitmap
 
     private val screen1
@@ -180,7 +192,7 @@ class MainActivity : AppCompatActivity() {
     private val rootView by lazy { window.decorView.rootView }
 
     private fun generateBitmap(): Bitmap {
-        val (width, height ) = TypedValue.applyDimension(
+        val (width, height) = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             600f,
             resources.displayMetrics
@@ -190,7 +202,7 @@ class MainActivity : AppCompatActivity() {
             resources.displayMetrics
         ).roundToInt()
         return rootView
-            .toBitmap(width,height, Rect(0, 0, width, height))
+            .toBitmap(width, height, Rect(0, 0, width, height))
             .scale(600, 400)
     }
 
