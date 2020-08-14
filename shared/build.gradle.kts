@@ -63,12 +63,12 @@ dependencies {
 
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation ("androidx.core:core-ktx:1.5.0-alpha01")
-    implementation ("androidx.appcompat:appcompat:1.1.0")
+    implementation ("androidx.appcompat:appcompat:1.2.0")
     implementation (project(path= ":utils"))
 
     //Web
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.8.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.8.1")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
 
@@ -94,8 +94,8 @@ dependencies {
     // Tests
     androidTestImplementation ("androidx.test.ext:junit:1.1.1")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.2.0")
-    androidTestImplementation ("org.mockito:mockito-core:3.4.4")
-    testImplementation ("org.mockito:mockito-core:3.4.4")
+    androidTestImplementation ("org.mockito:mockito-core:3.4.6")
+    testImplementation ("org.mockito:mockito-core:3.4.6")
     androidTestImplementation ("androidx.arch.core:core-testing:2.1.0")
 // (Required) Writing and executing Unit Tests on the JUnit Platform
 

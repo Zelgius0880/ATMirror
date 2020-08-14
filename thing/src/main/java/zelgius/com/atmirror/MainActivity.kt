@@ -6,18 +6,23 @@ import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.state
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.setContent
-import androidx.compose.ui.unit.dp
+import androidx.compose.MutableState
+import androidx.compose.state
 import androidx.lifecycle.LiveData
+import androidx.ui.core.ContextAmbient
+import androidx.ui.core.Modifier
+import androidx.ui.core.setContent
+import androidx.ui.layout.Row
+import androidx.ui.layout.size
+import androidx.ui.unit.dp
 import androidx.work.WorkInfo
 import com.facebook.stetho.Stetho
+import com.github.mikephil.charting.utils.Utils
 import com.google.android.things.pio.*
 import com.test.buzzer.Mario
+import com.zelgius.bitmap_ktx.scale
+import com.zelgius.bitmap_ktx.toBitmap
+import com.zelgius.livedataextensions.observe
 import khronos.Dates
 import kotlinx.coroutines.runBlocking
 import zelgius.com.atmirror.compose.Screen1
@@ -27,13 +32,12 @@ import zelgius.com.atmirror.compose.Screen2View
 import zelgius.com.atmirror.drivers.buzzer.Buzzer
 import zelgius.com.atmirror.drivers.buzzer.BuzzerAndroidThings
 import zelgius.com.atmirror.entities.SensorRecord
-import zelgius.com.atmirror.entities.json.DarkSky
+import zelgius.com.atmirror.entities.json.City
+import zelgius.com.atmirror.entities.json.OpenWeatherMap
 import zelgius.com.atmirror.shared.viewModel.MirrorNetworkViewModel
 import zelgius.com.atmirror.worker.DarkSkyResult
 import zelgius.com.atmirror.viewModels.InkyViewModel
 import zelgius.com.atmirror.viewModels.MainViewModel
-import zelgius.com.atmirror.viewModels.scale
-import zelgius.com.atmirror.viewModels.toBitmap
 import zelgius.com.utils.ViewModelHelper
 import zelgius.com.utils.round
 import zelgius.com.utils.toHexString
@@ -60,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     private val context by lazy { this }
 
 
-    private var s1: Screen1 = Screen1(null, null)
+    private var s1: Screen1 = Screen1(null, null, null, listOf())
     private var s2: Screen2? = null
 
     private var lastUpdate: Long = 0
@@ -70,15 +74,18 @@ class MainActivity : AppCompatActivity() {
         //setContentView(R.layout.activity_main)
         Stetho.initializeWithDefaults(this)
         setContent {
+            Utils.init(ContextAmbient.current)
             val stateTemperature: MutableState<Float?> = state { null }
             val statePressure: MutableState<Int?> = state { null }
-            val stateHistory: MutableState<List<SensorRecord>> = state { listOf() }
-            val stateForecast: MutableState<DarkSky> = state { DarkSky() }
+            val stateHumidity: MutableState<Int?> = state { null }
+            val stateHistory: MutableState<List<SensorRecord>> = state { listOf<SensorRecord>() }
+            val stateForecast: MutableState<OpenWeatherMap> = state { OpenWeatherMap(City(name = "", country = "")) }
 
             Row(modifier = Modifier.size(600.dp, 400.dp)) {
                 Screen1View(
                     history = stateHistory,
                     temperature = stateTemperature,
+                    humidity = stateHumidity,
                     pressure = statePressure
                 )
                 Screen2View(stateForecast)
@@ -88,8 +95,26 @@ class MainActivity : AppCompatActivity() {
                 if (it.temperature.toFloat().round(1) == stateTemperature.value?.round(1))
                     null
                 else {
-                    s1 = Screen1(s1.pressure, it.temperature.toFloat())
+                    s1 = s1.copy(temperature = it.temperature.toFloat())
                     it.temperature.toFloat().round(1)
+                }
+            }
+
+            viewModel.sht21Record.observerAndUpdateScreen1(stateHumidity) {
+                if (it.humidity.roundToInt() == stateTemperature.value?.roundToInt())
+                    null
+                else {
+                    s1 = s1.copy(humidity = it.humidity.roundToInt())
+                    it.humidity.roundToInt()
+                }
+            }
+
+            viewModel.history.observerAndUpdateScreen1(stateHistory) {
+                val list = it.subList((it.size -24).coerceAtMost(0), it.size)
+                if(stateHistory.value.containsAll(list)) null
+                else {
+                    s1 = s1.copy(history = list)
+                    it
                 }
             }
 
@@ -99,7 +124,7 @@ class MainActivity : AppCompatActivity() {
                 if (it.pressure.roundToInt() == statePressure.value)
                     null
                 else {
-                    s1 = Screen1(it.pressure.toFloat(), s1.temperature)
+                    s1 = s1.copy(pressure = it.pressure.roundToInt())
                     it.pressure.roundToInt()
                 }
             }
@@ -167,7 +192,6 @@ class MainActivity : AppCompatActivity() {
                         inkyViewModel.display(
                             screen1 = s1.apply { bitmap = screen1 },
                             screen2 = s2.apply { bitmap = screen2 }
-
                         )
                     }, 500L)
                 }
@@ -206,7 +230,6 @@ class MainActivity : AppCompatActivity() {
             .scale(600, 400)
     }
 
-    @Throws(IOException::class)
     fun configureUartFrame(uart: UartDevice) {
         uart.apply {
             // Configure the UART port
@@ -217,7 +240,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Throws(IOException::class)
     fun readUartBuffer(uart: UartDevice) =
         // Maximum amount of data to read at one time
         uart.run {

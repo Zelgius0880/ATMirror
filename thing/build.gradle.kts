@@ -1,17 +1,16 @@
-apply plugin: "com.android.application"
-apply plugin: "kotlin-android"
-apply plugin: "kotlin-android-extensions"
-apply plugin: "com.google.gms.google-services"
-apply plugin: "kotlin-kapt"
-
-
-def kotlinVersion = rootProject.ext.kotlinVersion
-
-def properties = new Properties()
-if (project.rootProject.file('local.properties').canRead()) {
-    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("kotlin-android-extensions")
+    id("com.google.gms.google-services")
+    id("kotlin-kapt")
 }
-def composeVersion = "0.1.0-dev16"
+
+val kotlinVersion = rootProject.extra.get("kotlinVersion")
+val getProps = rootProject.extra["getProps"] as (String) -> String
+
+
+val composeVersion = "0.1.0-dev14"
 
 android {
     compileSdkVersion(29)
@@ -21,31 +20,31 @@ android {
         targetSdkVersion(29)
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+                arguments (mutableMapOf("room.schemaLocation" to "$projectDir/schemas".toString()))
             }
         }
     }
     buildTypes {
-        debug {
-            buildConfigField("String", "DARKSKY_KEY", properties.getProperty("darkSky_key"))
-            buildConfigField("double", "LATITUDE", properties.getProperty("latitude"))
-            buildConfigField("double", "LONGITUDE", properties.getProperty("longitude"))
+        getByName("debug") {
+            buildConfigField("String", "DARKSKY_KEY", getProps("darkSky_key"))
+            buildConfigField("double", "LATITUDE", getProps("latitude"))
+            buildConfigField("double", "LONGITUDE", getProps("longitude"))
 
-            minifyEnabled = false
+            isMinifyEnabled = false
             proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro"
             )
         }
-        release {
-            buildConfigField("String", "DARKSKY_KEY", properties.getProperty("darkSky_key"))
-            buildConfigField("double", "LATITUDE", properties.getProperty("latitude"))
-            buildConfigField("double", "LONGITUDE", properties.getProperty("longitude"))
-            minifyEnabled = false
+        getByName("release") {
+            buildConfigField("String", "DARKSKY_KEY", getProps("darkSky_key"))
+            buildConfigField("double", "LATITUDE", getProps("latitude"))
+            buildConfigField("double", "LONGITUDE", getProps("longitude"))
+            isMinifyEnabled = false
             proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro"
@@ -83,18 +82,20 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerVersion = "1.4.0-rc"
+        //kotlinCompilerVersion = "1.4.0-rc"
         kotlinCompilerExtensionVersion = composeVersion
     }
 }
 
 
+/*
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs += ["-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check"]
     }
 }
+*/
 
 
 dependencies {
@@ -106,22 +107,29 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     compileOnly("com.google.android.things:androidthings:+")
 
-    implementation("com.google.android.material:material:1.1.0")
+    implementation("com.google.android.material:material:1.2.0")
 
     // You also need to include the following Compose toolkit dependencies.
-    implementation("androidx.compose.ui:ui:$composeVersion")
+/*    implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.ui:ui-tooling:$composeVersion")
     implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
+    implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")*/
+    implementation ("androidx.ui:ui-core:$composeVersion")
+    implementation ("androidx.ui:ui-tooling:$composeVersion")
+    implementation ("androidx.ui:ui-layout:$composeVersion")
+    implementation("androidx.compose:compose-runtime:$composeVersion")
+    implementation ("androidx.ui:ui-material:$composeVersion")
+
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation("com.caverock:androidsvg-aar:1.4")
 
     implementation("com.google.firebase:firebase-database:19.3.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("com.zelgius.android-libraries:ContextExtensions:1.0.0")
+    implementation("com.zelgius.android-libraries:livedataextensions:1.1.0")
+    implementation("com.zelgius.android-libraries:bitmap-ktx:1.0.1")
 
-    def lifecycleVersion = "2.2.0"
+    val lifecycleVersion = "2.2.0"
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
     kapt("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
@@ -129,11 +137,11 @@ dependencies {
     // alternately - if using Java8, use the following instead of lifecycle-compiler
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-    def workVersion = "1.0.1"
+    val workVersion = "1.0.1"
     implementation("android.arch.work:work-runtime-ktx:$workVersion")
 
     //Room
-    def roomVersion = "2.2.5"
+    val roomVersion = "2.2.5"
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:${roomVersion}")
     // For Kotlin use kapt instead of kapt
@@ -148,8 +156,7 @@ dependencies {
 
 
     //Other Libraries
-    implementation("com.jjoe64:graphview:4.2.2")
-    implementation(group : "com.github.hotchemi", name : "khronos", version : "0.9.0")
+    implementation(group = "com.github.hotchemi", name = "khronos", version = "0.9.0")
     implementation("com.facebook.stetho:stetho:1.5.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

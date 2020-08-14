@@ -1,14 +1,14 @@
 package zelgius.com.atmirror.viewModels
 
 import android.app.Application
-import android.graphics.*
-import android.util.Log
-import android.view.View
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Rect
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.PeripheralManager
-import com.zelgius.driver.eink.output
+import com.zelgius.bitmap_ktx.floydSteinbergDithering
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -19,6 +19,7 @@ import zelgius.com.atmirror.compose.Screen2
 import zelgius.com.atmirror.drivers.inky.WHatHALThing
 import zelgius.com.atmirror.openIutput
 import zelgius.com.atmirror.openOutput
+import com.zelgius.bitmap_ktx.rotate
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -75,13 +76,19 @@ class InkyViewModel(private val app: Application) : AndroidViewModel(app) {
                     val task1 = if (s1 != lastS1 && s1 != null && s1.bitmap != null) {
                         async {
                             lastS1 = s1
-                            inky1.setImage(s1.bitmap!!.rotate(-90f))
+                            inky1.setImage(s1.bitmap!!
+                                .floydSteinbergDithering(intArrayOf(Color.WHITE, Color.BLACK, Color.RED), Rect(0, 0,300, 200))
+                                .floydSteinbergDithering(intArrayOf(Color.WHITE, Color.BLACK, Color.RED), Rect(0, 250,300, 400))
+                                .rotate(-90f)
+                            )
+                            s1.bitmap?.recycle()
                         }
                     } else null
 
                     val task2 = if (s2 != lastS2 && s2 != null && s2.bitmap != null) async {
                         lastS2 = s2
                         inky2.setImage(s2.bitmap!!.rotate(90f))
+                        s2.bitmap?.recycle()
                     } else null
 
                     task1?.await()
@@ -106,63 +113,9 @@ class InkyViewModel(private val app: Application) : AndroidViewModel(app) {
         inky1.close()
         inky2.close()
     }
-
-
-    private fun Bitmap.rotate(degrees: Float = 90f): Bitmap =
-        Bitmap.createBitmap(
-            this,
-            0,
-            0,
-            width,
-            height,
-            Matrix().apply { postRotate(degrees) },
-            false
-        )
-            .apply {
-                try {
-                    FileOutputStream(
-                        File(
-                            app.getExternalFilesDir("images"),
-                            "bmp_rotated.png"
-                        )
-                    ).use { out ->
-                        compress(Bitmap.CompressFormat.PNG, 100, out) // bmp is your Bitmap instance
-                    }
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
 }
 
 data class DisplayQueue(
     val screen1: Screen1?,
     val screen2: Screen2?
 )
-
-fun View.toBitmap(
-    totalWidth: Int = measuredWidth,
-    totalHeight: Int = measuredHeight,
-    rect: Rect
-): Bitmap {
-    setLayerType(View.LAYER_TYPE_SOFTWARE, Paint().apply { isAntiAlias = false })
-    val b = Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888)
-    val c = Canvas(b).apply {
-        drawFilter = PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
-    }
-    measure(totalWidth, totalHeight)
-    layout(0, 0, totalHeight, totalWidth)
-
-    draw(c)
-
-    try {
-        FileOutputStream(File(context.getExternalFilesDir("images"), "bmp.png")).use { out ->
-            b.compress(Bitmap.CompressFormat.PNG, 100, out) // bmp is your Bitmap instance
-        }
-    } catch (e: IOException) {
-        e.printStackTrace()
-    }
-    return Bitmap.createBitmap(b, rect.left, rect.top, rect.width(), rect.height())
-}
-
-fun Bitmap.scale(dstWidth: Int, dstHeight: Int): Bitmap =
-    Bitmap.createScaledBitmap(this, dstWidth, dstHeight, false)

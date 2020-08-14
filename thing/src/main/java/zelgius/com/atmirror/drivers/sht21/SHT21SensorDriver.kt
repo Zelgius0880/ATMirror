@@ -173,12 +173,10 @@ class TemperatureUserDriver(private val device: SHT21) : UserSensorDriver {
             return mUserSensor
         }
 
-    @Throws(IOException::class)
     override fun read(): UserSensorReading {
         return UserSensorReading(floatArrayOf(device.readTemperature()))
     }
 
-    @Throws(IOException::class)
     override fun setEnabled(enabled: Boolean) {
         mEnabled = enabled
         //syncSamplingState()
@@ -220,12 +218,11 @@ class HumidityUserDriver(private val device: SHT21) : UserSensorDriver {
             return mUserSensor
         }
 
-    @Throws(IOException::class)
+    @ExperimentalUnsignedTypes
     override fun read(): UserSensorReading {
         return UserSensorReading(floatArrayOf(device.readHumidity()))
     }
 
-    @Throws(IOException::class)
     override fun setEnabled(enabled: Boolean) {
         mEnabled = enabled
         //syncSamplingState()

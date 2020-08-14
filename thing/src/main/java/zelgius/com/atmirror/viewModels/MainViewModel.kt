@@ -18,8 +18,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import zelgius.com.atmirror.drivers.sht21.SHT21SensorDriver
 import zelgius.com.atmirror.entities.SensorRecord
-import zelgius.com.atmirror.entities.json.DarkSky
-import zelgius.com.atmirror.repositories.DarkSkyRepository
+import zelgius.com.atmirror.entities.json.OpenWeatherMap
+import zelgius.com.atmirror.repositories.OpenWeatherMapRepository
 import zelgius.com.atmirror.repositories.DatabaseRepository
 import zelgius.com.atmirror.shared.repositories.PiclockRepository
 import zelgius.com.atmirror.worker.DarkSkyWorker
@@ -33,7 +33,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 
-class MainViewModel(private val context: Application) : AndroidViewModel(context), SensorEventListener {
+class MainViewModel (private val context: Application) : AndroidViewModel(context), SensorEventListener {
     private val sensorCallback = SensorCallback()
 
     private val piclockService = PiclockRepository()
@@ -42,11 +42,11 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
     val piclockCurrentRecord by lazy { piclockService.listenCurrentRecord() }
     private val lastKnownRecord = SensorRecord()
 
-    private val history = MutableLiveData<List<SensorRecord>>()
+    val history = MutableLiveData<List<SensorRecord>>()
     val sensorManager by lazy { (context.getSystemService(Context.SENSOR_SERVICE) as SensorManager) }
     private  var temperatureSensor: Sensor? = null
     val sht21Record = MutableLiveData<SensorRecord>()
-    var forecastLiveData = MutableLiveData<DarkSky>()
+    var forecastLiveData = MutableLiveData<OpenWeatherMap>()
 
     var workerState: LiveData<Operation.State>
     var workerStatus: LiveData<List<WorkInfo>>
@@ -58,11 +58,11 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
         }
 
         //WorkManager.getInstance().cancelAllWork()
-        DarkSkyRepository.service.getForecast(KEY, LATITUDE, LONGITUDE).enqueue(object  :
-            Callback<DarkSky> {
-            override fun onFailure(call: Call<DarkSky>, t: Throwable) {}
+        OpenWeatherMapRepository.service.getForecast(KEY, LATITUDE, LONGITUDE).enqueue(object  :
+            Callback<OpenWeatherMap> {
+            override fun onFailure(call: Call<OpenWeatherMap>, t: Throwable) {}
 
-            override fun onResponse(call: Call<DarkSky>, response: Response<DarkSky>) {
+            override fun onResponse(call: Call<OpenWeatherMap>, response: Response<OpenWeatherMap>) {
                 if(forecastLiveData.value == null) forecastLiveData.value = response.body()
             }
 

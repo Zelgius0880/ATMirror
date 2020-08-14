@@ -2,14 +2,13 @@ package zelgius.com.atmirror.drivers.sht21
 
 import android.util.Log
 import com.google.android.things.pio.I2cDevice
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.concurrent.TimeUnit
 import com.google.android.things.pio.PeripheralManager
 import java.io.IOException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
-import kotlin.experimental.or
 
 
 /**
@@ -44,7 +43,6 @@ class SHT21(i2cName: String, address: Int = 0x60) {
      * @throws IllegalArgumentException if {@code milliseconds} is less than zero.
      */
     private fun delay(milliseconds: Long) {
-        assert(milliseconds >= 0)
         if (milliseconds == 0L) {
             return
         }
@@ -64,7 +62,7 @@ class SHT21(i2cName: String, address: Int = 0x60) {
      * @param buffer containing two bytes (humidity raw value, 16bit scaled)
      * @return relative humidity [%RH]
      */
-    @OptIn(ExperimentalUnsignedTypes::class)
+    @ExperimentalUnsignedTypes
     fun calcRH(buffer: ByteBuffer): Float {
         /*var sRH = (buffer.get(0).toUInt() and 0xFF.toUInt())
 
@@ -177,7 +175,7 @@ class SHT21(i2cName: String, address: Int = 0x60) {
             this.device.read(bytes, 1)
             return Resolution.getResolution(bytes[0])
         } catch (exception: IOException) {
-            Log.e("Getting resolution failed because of an IOException: ", exception.message?:"no message");
+            Log.e("Getting resolution failed because of an IOException: ", exception.message?:"no message")
         }
         return null
     }
@@ -230,6 +228,7 @@ class SHT21(i2cName: String, address: Int = 0x60) {
         return null
     }
 
+    @ExperimentalUnsignedTypes
     fun measurePoll(measureType: MeasureType) =
         when (measureType) {
             MeasureType.HUMIDITY -> Measurement.create(this.measurePollHumidity(), MeasureType.HUMIDITY)
@@ -237,6 +236,7 @@ class SHT21(i2cName: String, address: Int = 0x60) {
         }
 
     fun readTemperature() = measurePollTemperature()
+    @ExperimentalUnsignedTypes
     fun readHumidity() = measurePollHumidity()
 
     private fun measurePollTemperature(): Float {
@@ -266,6 +266,7 @@ class SHT21(i2cName: String, address: Int = 0x60) {
         }
     }
 
+    @ExperimentalUnsignedTypes
     private fun measurePollHumidity(): Float {
         //this.softReset()
         try {
