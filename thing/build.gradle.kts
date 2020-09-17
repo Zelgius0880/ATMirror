@@ -1,3 +1,18 @@
+import java.io.FileInputStream
+import java.util.Properties
+val getProps by extra {
+    fun(propName: String): String {
+        val propsFile = rootProject.file("local.properties")
+        return if (propsFile.exists()) {
+            val props = Properties()
+            props.load(FileInputStream(propsFile))
+            props[propName] as String
+        } else {
+            ""
+        }
+    }
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -7,10 +22,11 @@ plugins {
 }
 
 val kotlinVersion = rootProject.extra.get("kotlinVersion")
-val getProps = rootProject.extra["getProps"] as (String) -> String
+//val getProps = rootProject.extra["getProps"] as (String) -> String
 
 
-val composeVersion = "0.1.0-dev14"
+val composeVersion by extra { "1.0.0-alpha02" }
+
 
 android {
     compileSdkVersion(29)
@@ -73,7 +89,8 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = "1.8"
+        useIR = true
     }
 
     buildFeatures {
@@ -82,7 +99,6 @@ android {
     }
 
     composeOptions {
-        //kotlinCompilerVersion = "1.4.0-rc"
         kotlinCompilerExtensionVersion = composeVersion
     }
 }
@@ -107,7 +123,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.1")
     compileOnly("com.google.android.things:androidthings:+")
 
-    implementation("com.google.android.material:material:1.2.0")
+    implementation("com.google.android.material:material:1.2.1")
 
     // You also need to include the following Compose toolkit dependencies.
 /*    implementation("androidx.compose.ui:ui:$composeVersion")
@@ -115,12 +131,18 @@ dependencies {
     implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")*/
-    implementation ("androidx.ui:ui-core:$composeVersion")
+    implementation ("androidx.compose.ui:ui:$composeVersion")
+    // Tooling supp(ort (Previews, etc.))
     implementation ("androidx.ui:ui-tooling:$composeVersion")
-    implementation ("androidx.ui:ui-layout:$composeVersion")
-    implementation("androidx.compose:compose-runtime:$composeVersion")
-    implementation ("androidx.ui:ui-material:$composeVersion")
-
+    // Foundation ((Border, Background, Box, Image, Scroll, shapes, animations, etc.))
+    implementation ("androidx.compose.foundation:foundation:$composeVersion")
+    // Material Des(ign)
+    implementation ("androidx.compose.material:material:$composeVersion")
+    // Material des(ign icons)
+    implementation ("androidx.compose.material:material-icons-core:$composeVersion")
+    implementation ("androidx.compose.material:material-icons-extended:$composeVersion")
+    // Integration (with observables)
+    implementation ("androidx.compose.runtime:runtime-livedata:$composeVersion")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     implementation("com.google.firebase:firebase-database:19.3.1")
@@ -137,8 +159,8 @@ dependencies {
     // alternately - if using Java8, use the following instead of lifecycle-compiler
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-    val workVersion = "1.0.1"
-    implementation("android.arch.work:work-runtime-ktx:$workVersion")
+    val workVersion = "2.4.0"
+    implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     //Room
     val roomVersion = "2.2.5"
@@ -150,7 +172,7 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
 
     //KTX & coroutines
-    implementation("androidx.core:core-ktx:1.5.0-alpha01")
+    implementation("androidx.core:core-ktx:1.5.0-alpha02")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
 
@@ -161,4 +183,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.8.6")
+}
+
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_1_8
 }

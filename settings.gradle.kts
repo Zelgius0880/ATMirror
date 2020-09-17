@@ -1,4 +1,4 @@
-rootProject.buildFileName = "build.gradle.kts"
+rootProject.buildFileName = "build.gradle"
 
 include (":swipeToDelete")
 include (":utils")

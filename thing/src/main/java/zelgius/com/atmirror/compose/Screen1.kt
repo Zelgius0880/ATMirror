@@ -1,31 +1,31 @@
 package zelgius.com.atmirror.compose
 
+import android.graphics.Bitmap
+import android.graphics.Color
+import androidx.compose.foundation.Box
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.state
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter.Companion.tint
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-import android.graphics.*
-import androidx.compose.Composable
-import androidx.compose.MutableState
-import androidx.compose.State
-import androidx.compose.state
-import androidx.ui.core.Alignment
-import androidx.ui.core.ContentScale
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.Box
-import androidx.ui.foundation.Image
-import androidx.ui.foundation.Text
-import androidx.ui.graphics.ColorFilter.Companion.tint
-import androidx.ui.layout.*
-import androidx.ui.res.vectorResource
-import androidx.ui.text.TextStyle
-import androidx.ui.text.style.TextAlign
 import androidx.ui.tooling.preview.Preview
-import androidx.ui.unit.dp
-import androidx.ui.unit.sp
 import zelgius.com.atmirror.R
 import zelgius.com.atmirror.entities.SensorRecord
 import java.util.*
 import kotlin.math.ceil
 import kotlin.random.Random
-import androidx.ui.graphics.Color as CColor
+import androidx.compose.ui.graphics.Color as CColor
 
 data class Screen1(
     val pressure: Int?,

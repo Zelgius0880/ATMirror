@@ -1,6 +1,8 @@
 package zelgius.com.atmirror.viewModels
 
+import android.app.AlarmManager
 import android.app.Application
+import android.app.PendingIntent
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -22,10 +24,7 @@ import zelgius.com.atmirror.entities.json.OpenWeatherMap
 import zelgius.com.atmirror.repositories.OpenWeatherMapRepository
 import zelgius.com.atmirror.repositories.DatabaseRepository
 import zelgius.com.atmirror.shared.repositories.PiclockRepository
-import zelgius.com.atmirror.worker.DarkSkyWorker
-import zelgius.com.atmirror.worker.KEY
-import zelgius.com.atmirror.worker.LATITUDE
-import zelgius.com.atmirror.worker.LONGITUDE
+import zelgius.com.atmirror.worker.*
 import zelgius.com.utils.toLocalDateTime
 import java.time.Duration
 import java.time.Instant
@@ -74,11 +73,33 @@ class MainViewModel (private val context: Application) : AndroidViewModel(contex
             .build()
 
         workerState = WorkManager
-            .getInstance()
+            .getInstance(context)
             .enqueueUniquePeriodicWork("darkSkyRequest", ExistingPeriodicWorkPolicy.REPLACE, periodicWorker)
             .state
 
-        workerStatus = WorkManager.getInstance().getWorkInfosByTagLiveData("darkSkyRequest")
+        workerStatus = WorkManager.getInstance(context).getWorkInfosByTagLiveData("darkSkyRequest")
+
+        val midnight = Calendar.getInstance().run {
+            add(Calendar.DATE, 1)
+            set(Calendar.HOUR, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            time.time - Date().time
+        }
+
+        WorkManager
+            .getInstance(context)
+            .enqueueUniquePeriodicWork("reboot", ExistingPeriodicWorkPolicy.REPLACE,
+                PeriodicWorkRequestBuilder<RebootWorker>(Duration.ofHours(24))
+                    .setConstraints(Constraints.NONE)
+                    .addTag("reboot")
+                    .setInitialDelay(Duration.ofMillis(midnight))
+                    .build()
+            )
+            .state
+
     }
 
     fun registerDrivers() {
@@ -196,5 +217,6 @@ class MainViewModel (private val context: Application) : AndroidViewModel(contex
             sensorManager.unregisterListener(this@MainViewModel)
         }
     }
+
 
 }

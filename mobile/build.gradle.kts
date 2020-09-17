@@ -1,4 +1,18 @@
 import org.gradle.kotlin.dsl.kotlin
+import java.io.FileInputStream
+import java.util.Properties
+val getProps by extra {
+    fun(propName: String): String {
+        val propsFile = rootProject.file("local.properties")
+        return if (propsFile.exists()) {
+            val props = Properties()
+            props.load(FileInputStream(propsFile))
+            props[propName] as String
+        } else {
+            ""
+        }
+    }
+}
 
 plugins {
     id("com.android.application")
@@ -8,7 +22,10 @@ plugins {
     id("kotlin-kapt")
 }
 val kotlinVersion = rootProject.extra.get("kotlinVersion") as String
-val getProps = rootProject.extra["getProps"] as (String) -> String
+//val getProps = rootProject.extra["getProps"] as (String) -> String
+
+
+
 
 android {
     compileSdkVersion (29)

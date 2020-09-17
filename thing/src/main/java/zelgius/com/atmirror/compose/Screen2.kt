@@ -1,27 +1,27 @@
 package zelgius.com.atmirror.compose
 
 import android.graphics.Bitmap
-import androidx.compose.Composable
-import androidx.compose.MutableState
-import androidx.compose.state
-import androidx.ui.core.Alignment
-import androidx.ui.core.ContentScale
-import androidx.ui.core.ContextAmbient
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.Box
-import androidx.ui.foundation.ContentGravity
-import androidx.ui.foundation.Image
-import androidx.ui.foundation.Text
-import androidx.ui.geometry.Offset
-import androidx.ui.graphics.ColorFilter.Companion.tint
-import androidx.ui.graphics.Shadow
-import androidx.ui.layout.*
-import androidx.ui.material.Divider
-import androidx.ui.res.vectorResource
-import androidx.ui.text.TextStyle
+import androidx.compose.foundation.Box
+import androidx.compose.foundation.ContentGravity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.state
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ColorFilter.Companion.tint
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.ui.tooling.preview.Preview
-import androidx.ui.unit.dp
-import androidx.ui.unit.sp
 import com.google.gson.Gson
 import zelgius.com.atmirror.R
 import zelgius.com.atmirror.entities.json.ForecastData
@@ -30,7 +30,7 @@ import zelgius.com.utils.toLocalDateTime
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.ZoneId
-import androidx.ui.graphics.Color as CColor
+import androidx.compose.ui.graphics.Color as CColor
 
 data class Screen2(val forecast: OpenWeatherMap) {
     var bitmap: Bitmap? = null

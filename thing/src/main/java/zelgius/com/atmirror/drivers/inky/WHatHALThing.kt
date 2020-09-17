@@ -15,17 +15,12 @@ import java.nio.ByteBuffer
 val TAG = WHatHALThing::class.simpleName
 
 class WHatHALThing(
-    private val cs: Gpio,
     private val dc: Gpio,
     private val reset: Gpio,
     private val busy: Gpio,
     private val spi: SpiDevice,
     color: InkyColor = InkyColor.RED_HT
 ) : WHatHAL(color = color) {
-
-    init {
-        writeChipSelect(false)
-    }
 
     override fun readBusy(): Boolean = busy.value
 
@@ -37,19 +32,12 @@ class WHatHALThing(
         dc.value = high
     }
 
-    override fun writeChipSelect(high: Boolean) {
-        cs.value = high
-    }
-
     override fun writeSpi(value: Int) {
-        writeChipSelect(true)
         spi.write(byteArrayOf(value.toByte()), 1)
-        writeChipSelect(false)
     }
 
     override fun writeSpi(value: IntArray) {
         val buffer = ByteBuffer.wrap(value.map { it.toByte() }.toByteArray())
-        writeChipSelect(true)
         while (buffer.remaining() > 0) {
             with(ByteArray(1024)) {
                 val get = kotlin.math.min(buffer.remaining(), 1024)
@@ -58,7 +46,6 @@ class WHatHALThing(
 
             }
         }
-        writeChipSelect(false)
     }
 
     fun setImage(image: Bitmap, rotation: Int? = null, default: InkyColor = InkyColor.WHITE) {
@@ -86,16 +73,11 @@ class WHatHALThing(
 
     override suspend fun show(wait: Boolean) {
         super.show(wait)
-        delay(15000)
+        delay(18000)
 
     }
 
     fun close() {
-        try {
-            cs.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
 
         try {
             busy.close()

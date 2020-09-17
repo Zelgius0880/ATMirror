@@ -19,7 +19,6 @@ abstract class InkyHAL(
     abstract fun readBusy(): Boolean
     abstract fun writeReset(high: Boolean)
     abstract fun writeDC(high: Boolean)
-    abstract fun writeChipSelect(high: Boolean)
     abstract fun writeSpi(value: Int)
     abstract fun writeSpi(value: IntArray)
 

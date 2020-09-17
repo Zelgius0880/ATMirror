@@ -57,6 +57,50 @@ object Mario {
         12, 12, 12, 12,
         12, 12, 12, 12
     )
+ //Mario main theme melody
+    var melodyShort = arrayOf(
+        Note.E7, Note.E7, Note.NONE, Note.E7,
+        Note.NONE, Note.C7, Note.E7, Note.NONE,
+        Note.G7, Note.NONE, Note.NONE, Note.NONE,
+        Note.G6, Note.NONE, Note.NONE, Note.NONE,
+        /*Note.C7, Note.NONE, Note.NONE, Note.G6,*/
+        /*Note.NONE, Note.NONE, Note.E6, Note.NONE,
+        Note.NONE, Note.A6, Note.NONE, Note.B6,
+        Note.NONE, Note.AS6, Note.A6, Note.NONE,
+        Note.G6, Note.E7, Note.G7,*/
+        /*Note.A7, Note.NONE, Note.F7, Note.G7,
+        Note.NONE, Note.E7, Note.NONE, Note.C7,
+        Note.D7, Note.B6, Note.NONE, Note.NONE,
+        Note.C7, Note.NONE, Note.NONE, Note.G6,
+        Note.NONE, Note.NONE, Note.E6, Note.NONE,
+        Note.NONE, Note.A6, Note.NONE, Note.B6,
+        Note.NONE, Note.AS6, Note.A6, Note.NONE,
+        Note.G6, Note.E7, Note.G7,
+        Note.A7, Note.NONE, Note.F7, Note.G7,
+        Note.NONE, Note.E7, Note.NONE, Note.C7,
+        Note.D7, Note.B6, Note.NONE, Note.NONE*/
+    ) to intArrayOf(
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        /*12, 12, 12, 12,*/
+        /*12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        9, 9, 9,*/
+        /*12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        9, 9, 9,
+        12, 12, 12, 12,
+        12, 12, 12, 12,
+        12, 12, 12, 12*/
+    )
 
     //Underworld melody
     var underworld = arrayOf(

@@ -6,15 +6,16 @@ import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.MutableState
-import androidx.compose.state
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.state
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
-import androidx.ui.core.ContextAmbient
-import androidx.ui.core.Modifier
-import androidx.ui.core.setContent
-import androidx.ui.layout.Row
-import androidx.ui.layout.size
-import androidx.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
 import com.facebook.stetho.Stetho
 import com.github.mikephil.charting.utils.Utils
@@ -24,6 +25,8 @@ import com.zelgius.bitmap_ktx.scale
 import com.zelgius.bitmap_ktx.toBitmap
 import com.zelgius.livedataextensions.observe
 import khronos.Dates
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import zelgius.com.atmirror.compose.Screen1
 import zelgius.com.atmirror.compose.Screen1View
@@ -73,6 +76,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_main)
         Stetho.initializeWithDefaults(this)
+
+
         setContent {
             Utils.init(ContextAmbient.current)
             val stateTemperature: MutableState<Float?> = state { null }
@@ -110,7 +115,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             viewModel.history.observerAndUpdateScreen1(stateHistory) {
-                val list = it.subList((it.size -24).coerceAtMost(0), it.size)
+                val list = it.subList((it.size -24).coerceAtLeast(0), it.size)
                 if(stateHistory.value.containsAll(list)) null
                 else {
                     s1 = s1.copy(history = list)
@@ -159,6 +164,11 @@ class MainActivity : AppCompatActivity() {
 
         pwm = PeripheralManager.getInstance().openPwm("PWM1")
 
+        val pwm0 =  PeripheralManager.getInstance().openPwm("PWM0")
+        pwm0.setPwmDutyCycle(90.0)
+        pwm0.setPwmFrequencyHz(256.0)
+        pwm0.setEnabled(true)
+
         viewModel.getRecordHistory(from = Dates.yesterday)
 
         viewModel.workerStatus.observe(this) { list ->
@@ -185,7 +195,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         observe(context) {
             with(update(it)) {
-                if (this != null && currentTimeStamp - lastUpdate >= 60 * 1000) {
+                if (this != null/* && currentTimeStamp - lastUpdate >= 60 * 1000*/) {
                     state.value = this
                     rootView.postDelayed({
                         bitmap = generateBitmap()
@@ -216,6 +226,7 @@ class MainActivity : AppCompatActivity() {
     private val rootView by lazy { window.decorView.rootView }
 
     private fun generateBitmap(): Bitmap {
+        if(this::bitmap.isInitialized) bitmap.recycle()
         val (width, height) = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             600f,
@@ -226,8 +237,11 @@ class MainActivity : AppCompatActivity() {
             resources.displayMetrics
         ).roundToInt()
         return rootView
-            .toBitmap(width, height, Rect(0, 0, width, height))
-            .scale(600, 400)
+            .toBitmap(width, height, Rect(0, 0, width, height)).let {
+                it.scale(600, 400).apply {
+                    it.recycle()
+                }
+            }
     }
 
     fun configureUartFrame(uart: UartDevice) {
@@ -267,6 +281,11 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         // Begin listening for interrupt events
         mDevice?.registerUartDeviceCallback(uartCallback)
+
+        lifecycleScope.launch {
+            delay(1000)
+            buzzer.playMelody(Mario.melodyShort.first, Mario.melodyShort.second)
+        }
     }
 
     override fun onStop() {

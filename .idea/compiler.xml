@@ -3,7 +3,13 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.8">
       <module name="ATMirror.extensions" target="1.8" />
+      <module name="ATMirror.inky" target="11" />
       <module name="ATMirror.lights" target="1.7" />
+      <module name="ATMirror.mobile" target="11" />
+      <module name="ATMirror.shared" target="11" />
+      <module name="ATMirror.swipeToDelete" target="11" />
+      <module name="ATMirror.thinTest" target="11" />
+      <module name="ATMirror.utils" target="11" />
       <module name="lights" target="1.7" />
       <module name="mobile" target="1.7" />
       <module name="shared" target="1.7" />

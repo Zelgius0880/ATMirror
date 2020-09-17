@@ -22,9 +22,9 @@ class Chart @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     size: Pair<Int, Int> = MATCH_PARENT to MATCH_PARENT,
     legendEnabled: Boolean = false,
-    leftAxis: ChartYAxis? = null,
-    rightAxis: ChartYAxis? = null,
-    xAxis: ChartXAxis? = null,
+    val leftAxis: ChartYAxis? = null,
+    val rightAxis: ChartYAxis? = null,
+    val x: ChartXAxis? = null,
     backgroundColor: Int? = null,
     extraBottomOffset: Float? = null
 ) : LineChart(context, attrs, defStyleAttr) {
@@ -36,7 +36,7 @@ class Chart @JvmOverloads constructor(
 
         leftAxis?.applyOnAxis(axisLeft)
         rightAxis?.applyOnAxis(axisRight)
-        xAxis?.applyOnAxis(this.xAxis)
+        x?.applyOnAxis(this.xAxis)
         backgroundColor?.let { this.background = ColorDrawable(backgroundColor) }
         description = null
 

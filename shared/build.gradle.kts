@@ -1,8 +1,21 @@
 import org.gradle.kotlin.dsl.kotlin
-
+import java.io.FileInputStream
+import java.util.Properties
+val getProps by extra {
+    fun(propName: String): String {
+        val propsFile = rootProject.file("local.properties")
+        return if (propsFile.exists()) {
+            val props = Properties()
+            props.load(FileInputStream(propsFile))
+            props[propName] as String
+        } else {
+            ""
+        }
+    }
+}
 
 val kotlinVersion = rootProject.extra.get("kotlinVersion")
-val getProps = rootProject.extra["getProps"] as (String) -> String
+//val getProps = rootProject.extra["getProps"] as (String) -> String
 
 plugins {
     id("com.android.library")
