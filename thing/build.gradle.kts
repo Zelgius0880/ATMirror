@@ -49,6 +49,12 @@ android {
             buildConfigField("String", "DARKSKY_KEY", getProps("darkSky_key"))
             buildConfigField("double", "LATITUDE", getProps("latitude"))
             buildConfigField("double", "LONGITUDE", getProps("longitude"))
+            buildConfigField("String", "NETATMO_MAC", getProps("netatmo.mac"))
+            buildConfigField("String", "NETATMO_MODULE_MAC", getProps("netatmo.module.mac"))
+            buildConfigField("String", "NETATMO_CLIENT_ID", getProps("netatmo.client.id"))
+            buildConfigField("String", "NETATMO_CLIENT_SECRET", getProps("netatmo.client.secret"))
+            buildConfigField("String", "NETATMO_USER_PASSWORD", getProps("netatmo.user.password"))
+            buildConfigField("String", "NETATMO_USER_EMAIL", getProps("netatmo.user.email"))
 
             isMinifyEnabled = false
             proguardFiles(
@@ -60,6 +66,12 @@ android {
             buildConfigField("String", "DARKSKY_KEY", getProps("darkSky_key"))
             buildConfigField("double", "LATITUDE", getProps("latitude"))
             buildConfigField("double", "LONGITUDE", getProps("longitude"))
+            buildConfigField("String", "NETATMO_MAC", getProps("netatmo.mac"))
+            buildConfigField("String", "NETATMO_MODULE_MAC", getProps("netatmo.module.mac"))
+            buildConfigField("String", "NETATMO_CLIENT_ID", getProps("netatmo.client.id"))
+            buildConfigField("String", "NETATMO_CLIENT_SECRET", getProps("netatmo.client.secret"))
+            buildConfigField("String", "NETATMO_USER_PASSWORD", getProps("netatmo.user.password"))
+            buildConfigField("String", "NETATMO_USER_EMAIL", getProps("netatmo.user.email"))
             isMinifyEnabled = false
             proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -120,7 +132,7 @@ dependencies {
     implementation(project(":shared"))
 
     testImplementation("junit:junit:4.13")
-    androidTestImplementation("androidx.test.ext:junit:1.1.1")
+    androidTestImplementation("androidx.test.ext:junit:1.1.2")
     compileOnly("com.google.android.things:androidthings:+")
 
     implementation("com.google.android.material:material:1.2.1")
@@ -145,7 +157,7 @@ dependencies {
     implementation ("androidx.compose.runtime:runtime-livedata:$composeVersion")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    implementation("com.google.firebase:firebase-database:19.3.1")
+    implementation("com.google.firebase:firebase-database:19.4.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("com.zelgius.android-libraries:ContextExtensions:1.0.0")
     implementation("com.zelgius.android-libraries:livedataextensions:1.1.0")
@@ -172,7 +184,7 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
 
     //KTX & coroutines
-    implementation("androidx.core:core-ktx:1.5.0-alpha02")
+    implementation("androidx.core:core-ktx:1.5.0-alpha03")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
 
@@ -183,6 +195,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.8.6")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.8.1")
 }
 
 configure<JavaPluginConvention> {

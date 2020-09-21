@@ -5,6 +5,8 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="temperature_in">in</string>
+    <string name="temperature_out">out</string>
     <string name="temperature_title">Temperature</string>
     <string name="rh_title">RH</string>
     <string name="elevation_title">Elevation</string>

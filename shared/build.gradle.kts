@@ -75,7 +75,7 @@ dependencies {
     implementation (fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation ("androidx.core:core-ktx:1.5.0-alpha01")
+    implementation ("androidx.core:core-ktx:1.5.0-alpha03")
     implementation ("androidx.appcompat:appcompat:1.2.0")
     implementation (project(path= ":utils"))
 
@@ -89,6 +89,7 @@ dependencies {
     val lifecycle_version = "2.2.0"
     api ("androidx.core:core-ktx:1.5.0-alpha01")
     api ("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    api ("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
     api ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
 
     //Firebase

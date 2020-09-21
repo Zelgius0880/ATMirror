@@ -2,6 +2,7 @@ package zelgius.com.atmirror.shared.viewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.BuildConfig
@@ -17,19 +18,19 @@ class MirrorNetworkViewModel(val app: Application) : AndroidViewModel(app) {
 
 
     private val stateListener: (State) -> Unit = {
-            status = it
+        status = it
 
-            viewModelScope.launch {
-                when (status) {
-                    State.NOT_WORKING -> {
-                        repository.stopDiscovery()
-                        repository.sendSwitch(null)
-                    }
-                    State.DISCOVERING -> {
-                        repository.startDiscovery()
-                    }
+        viewModelScope.launch {
+            when (status) {
+                State.NOT_WORKING -> {
+                    repository.stopDiscovery()
+                    repository.sendSwitch(null)
+                }
+                State.DISCOVERING -> {
+                    repository.startDiscovery()
                 }
             }
+        }
     }
 
     private val repository = NetworkRepository(
@@ -39,26 +40,29 @@ class MirrorNetworkViewModel(val app: Application) : AndroidViewModel(app) {
     private val groupRepository = GroupRepository()
     private val lightRepository = LightRepository()
 
-    fun switchPressed(bytes: ByteArray) {
+    fun switchPressed(bytes: ByteArray) =
         if (status == State.DISCOVERING)
-            viewModelScope.launch {
+            liveData {
                 repository.sendSwitch(Switch(bytes))
+                emit(true)
             }
-
         else {
             setLightState(bytes.toHexString())
         }
-    }
 
-    private fun setLightState(uuid: String) {
-        viewModelScope.launch {
-            groupRepository.getGroupFromSwitch(uuid).forEach { g ->
-                g.lights.forEach {
-                    lightRepository.setState(it)
+
+    private fun setLightState(uuid: String) =
+        liveData {
+            with(groupRepository.getGroupFromSwitch(uuid)) {
+                forEach { g ->
+                    g.lights.forEach {
+                        lightRepository.setState(it)
+                    }
                 }
+                emit(isNotEmpty())
             }
         }
-    }
+
 
     override fun onCleared() {
         super.onCleared()

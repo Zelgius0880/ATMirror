@@ -2,6 +2,7 @@ package zelgius.com.atmirror.compose
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Box
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Text
@@ -13,8 +14,10 @@ import androidx.compose.runtime.state
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +34,7 @@ data class Screen1(
     val pressure: Int?,
     val humidity: Int?,
     val temperature: Float?,
+    val temperatureExternal: Float?,
     val history: List<SensorRecord>
 ) {
     var bitmap: Bitmap? = null
@@ -58,24 +62,14 @@ data class Screen1(
 @Composable
 fun Screen1View(
     temperature: State<Float?>,
+    temperatureExternal: State<Float?>,
     pressure: State<Int?>,
     humidity: MutableState<Int?>,
     history: State<List<SensorRecord>>
 ) {
     Column(modifier = Modifier.size(300.dp, 400.dp)) {
 
-        Text(
-            "${
-                if (temperature.value != null)
-                    String.format("%.1f", temperature.value)
-                else "---"
-            } °C",
-            style = TextStyle(
-                fontSize = 36.sp, textAlign = TextAlign.Start,
-                color = CColor(Color.WHITE)
-            ),
-            modifier = Modifier.padding(start = 16.dp, top = 18.dp)
-        )
+        Temperature(temperature, temperatureExternal)
 
         Box(Modifier.fillMaxWidth() + Modifier.height(120.dp)) {
             TemperatureChart(history = history)
@@ -88,6 +82,62 @@ fun Screen1View(
             PressureChart(history = history)
         }
     }
+}
+
+@Composable
+private fun Temperature(temperature: State<Float?>, temperatureExternal: State<Float?>, ) {
+    Row() {
+
+        Column(modifier = Modifier.weight(1f, true)) {
+            Text(
+                stringResource(id = R.string.temperature_in).toUpperCase(Locale.getDefault()),
+                style = TextStyle(
+                    fontSize = 16.sp, textAlign = TextAlign.Start,
+                    color = CColor(Color.RED),
+                    fontWeight = FontWeight.Light
+                ),
+                modifier = Modifier.padding(start = 12.dp, top = 8.dp)
+            )
+            Text(
+                "${
+                    if (temperature.value != null)
+                        String.format("%.1f", temperature.value)
+                    else "---"
+                } °C",
+                style = TextStyle(
+                    fontSize = 36.sp, textAlign = TextAlign.Start,
+                    color = CColor(Color.WHITE)
+                ),
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f, true)) {
+            Text(
+                stringResource(id = R.string.temperature_out).toUpperCase(Locale.getDefault()),
+                style = TextStyle(
+                    fontSize = 16.sp, textAlign = TextAlign.Start,
+                    color = CColor(Color.RED),
+                    fontWeight = FontWeight.Light
+                ),
+                modifier = Modifier.padding(start = 12.dp, top = 8.dp)
+            )
+            Text(
+                "${
+                    if (temperatureExternal.value != null)
+                        String.format("%.1f", temperatureExternal.value)
+                    else "---"
+                } °C",
+                style = TextStyle(
+                    fontSize = 36.sp, textAlign = TextAlign.Start,
+                    color = CColor(Color.WHITE)
+                ),
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+
+    }
+
 }
 
 const val BAROMETER_RANGE_LOW = 965f
@@ -182,6 +232,7 @@ private fun Humidity(humidity: MutableState<Int?>) {
 @Preview
 private fun Preview() {
     val stateTemperature: MutableState<Float?> = state { 21f }
+    val stateTemperatureExternal: MutableState<Float?> = state { 19f }
     val statePressure: MutableState<Int?> = state { 988 }
     val stateHumidity: MutableState<Int?> = state { 50 }
     val now = Date().time
@@ -197,6 +248,7 @@ private fun Preview() {
 
     Screen1View(
         temperature = stateTemperature,
+        temperatureExternal = stateTemperatureExternal,
         pressure = statePressure,
         humidity = stateHumidity,
         history = stateHistory

@@ -2,7 +2,6 @@ package zelgius.com.atmirror.shared.repository.lights
 
 import com.google.gson.*
 import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

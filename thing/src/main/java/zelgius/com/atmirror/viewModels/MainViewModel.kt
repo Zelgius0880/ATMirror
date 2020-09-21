@@ -1,17 +1,12 @@
 package zelgius.com.atmirror.viewModels
 
-import android.app.AlarmManager
 import android.app.Application
-import android.app.PendingIntent
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.work.*
 import khronos.Dates
 import kotlinx.coroutines.launch
@@ -20,6 +15,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import zelgius.com.atmirror.drivers.sht21.SHT21SensorDriver
 import zelgius.com.atmirror.entities.SensorRecord
+import zelgius.com.atmirror.entities.UnknownSignal
 import zelgius.com.atmirror.entities.json.OpenWeatherMap
 import zelgius.com.atmirror.repositories.OpenWeatherMapRepository
 import zelgius.com.atmirror.repositories.DatabaseRepository
@@ -46,9 +42,13 @@ class MainViewModel (private val context: Application) : AndroidViewModel(contex
     private  var temperatureSensor: Sensor? = null
     val sht21Record = MutableLiveData<SensorRecord>()
     var forecastLiveData = MutableLiveData<OpenWeatherMap>()
+    var netatmoLiveData = MutableLiveData<List<Pair<LocalDateTime, Double>>>()
 
-    var workerState: LiveData<Operation.State>
-    var workerStatus: LiveData<List<WorkInfo>>
+    private var workerOwmState: LiveData<Operation.State>
+    var workerOwmStatus: LiveData<List<WorkInfo>>
+
+    private var workerNetatmoState: LiveData<Operation.State>
+    var workerNetatmoStatus: LiveData<List<WorkInfo>>
 
     init {
         SHT21SensorDriver("I2C1").apply {
@@ -67,17 +67,29 @@ class MainViewModel (private val context: Application) : AndroidViewModel(contex
 
         })
 
-        val periodicWorker = PeriodicWorkRequestBuilder<DarkSkyWorker>(Duration.ofHours(1))
+        val periodicOwmWorker = PeriodicWorkRequestBuilder<DarkSkyWorker>(Duration.ofHours(1))
             .setConstraints(Constraints.NONE)
             .addTag("darkSkyRequest")
             .build()
 
-        workerState = WorkManager
+        workerOwmState = WorkManager
             .getInstance(context)
-            .enqueueUniquePeriodicWork("darkSkyRequest", ExistingPeriodicWorkPolicy.REPLACE, periodicWorker)
+            .enqueueUniquePeriodicWork("darkSkyRequest", ExistingPeriodicWorkPolicy.REPLACE, periodicOwmWorker)
             .state
 
-        workerStatus = WorkManager.getInstance(context).getWorkInfosByTagLiveData("darkSkyRequest")
+        workerOwmStatus = WorkManager.getInstance(context).getWorkInfosByTagLiveData("darkSkyRequest")
+
+        val periodicNetatmoWorker = PeriodicWorkRequestBuilder<NetatmoWorker>(Duration.ofMinutes(16))
+            .setConstraints(Constraints.NONE)
+            .addTag("netatmoRequest")
+            .build()
+
+        workerNetatmoState = WorkManager
+            .getInstance(context)
+            .enqueueUniquePeriodicWork("netatmoRequest", ExistingPeriodicWorkPolicy.REPLACE, periodicNetatmoWorker)
+            .state
+
+        workerNetatmoStatus = WorkManager.getInstance(context).getWorkInfosByTagLiveData("netatmoRequest")
 
         val midnight = Calendar.getInstance().run {
             add(Calendar.DATE, 1)
@@ -203,6 +215,18 @@ class MainViewModel (private val context: Application) : AndroidViewModel(contex
         }
     }
 
+
+    fun saveUnknownSignal(item: UnknownSignal): LiveData<Long> =
+        MutableLiveData<Long>().also {
+            viewModelScope.launch {
+                with(databaseService.insertUnknownSignal(item)) {
+                    it.value = this
+                }
+            }
+        }
+
+
+
     internal inner class SensorCallback : SensorManager.DynamicSensorCallback() {
         override fun onDynamicSensorConnected(sensor: Sensor) {
             // Begin listening for sensor readings
@@ -217,6 +241,5 @@ class MainViewModel (private val context: Application) : AndroidViewModel(contex
             sensorManager.unregisterListener(this@MainViewModel)
         }
     }
-
 
 }

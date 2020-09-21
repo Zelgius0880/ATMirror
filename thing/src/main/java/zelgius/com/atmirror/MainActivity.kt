@@ -1,5 +1,9 @@
 package zelgius.com.atmirror
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
@@ -35,16 +39,19 @@ import zelgius.com.atmirror.compose.Screen2View
 import zelgius.com.atmirror.drivers.buzzer.Buzzer
 import zelgius.com.atmirror.drivers.buzzer.BuzzerAndroidThings
 import zelgius.com.atmirror.entities.SensorRecord
+import zelgius.com.atmirror.entities.UnknownSignal
 import zelgius.com.atmirror.entities.json.City
 import zelgius.com.atmirror.entities.json.OpenWeatherMap
 import zelgius.com.atmirror.shared.viewModel.MirrorNetworkViewModel
 import zelgius.com.atmirror.worker.DarkSkyResult
 import zelgius.com.atmirror.viewModels.InkyViewModel
 import zelgius.com.atmirror.viewModels.MainViewModel
+import zelgius.com.atmirror.worker.NetatmoResult
 import zelgius.com.utils.ViewModelHelper
 import zelgius.com.utils.round
 import zelgius.com.utils.toHexString
 import java.io.IOException
+import java.lang.Exception
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -67,11 +74,53 @@ class MainActivity : AppCompatActivity() {
     private val context by lazy { this }
 
 
-    private var s1: Screen1 = Screen1(null, null, null, listOf())
+    private var s1: Screen1 = Screen1(null, null, null, null, listOf())
     private var s2: Screen2? = null
 
     private var lastUpdate: Long = 0
     private var mDevice: UartDevice? = null
+
+    private val pwm0: Pwm by lazy {
+        PeripheralManager.getInstance().openPwm("PWM0").apply {
+            setPwmDutyCycle(0.0)
+            setPwmFrequencyHz(256.0)
+            setEnabled(true)
+        }
+    }
+
+    private var currentPwm0: Pwm? = null
+
+    private var weatherMap: OpenWeatherMap? = null
+
+    private val tickReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            weatherMap?.let {
+                if (currentPwm0 == null
+                    && System.currentTimeMillis() / 1000 > it.list.first().sunset
+                    && System.currentTimeMillis() / 1000 < it.list[1].sunrise
+                )
+
+                    lifecycleScope.launch {
+                        (0..100).forEach { i ->
+                            pwm0.setPwmDutyCycle(i.toDouble())
+                            delay(10)
+                        }
+
+                        currentPwm0 = pwm0
+                    }
+                else {
+                    lifecycleScope.launch {
+                        (100 downTo 0).forEach { i ->
+                            pwm0.setPwmDutyCycle(i.toDouble())
+                            delay(10)
+                        }
+                        currentPwm0 = null
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_main)
@@ -84,12 +133,16 @@ class MainActivity : AppCompatActivity() {
             val statePressure: MutableState<Int?> = state { null }
             val stateHumidity: MutableState<Int?> = state { null }
             val stateHistory: MutableState<List<SensorRecord>> = state { listOf<SensorRecord>() }
-            val stateForecast: MutableState<OpenWeatherMap> = state { OpenWeatherMap(City(name = "", country = "")) }
+            val stateForecast: MutableState<OpenWeatherMap> =
+                state { OpenWeatherMap(City(name = "", country = "")) }
+            val stateExternalTemperature: MutableState<Float?> = state { null }
+            //FIXME using remember{} instead of state{}
 
             Row(modifier = Modifier.size(600.dp, 400.dp)) {
                 Screen1View(
                     history = stateHistory,
                     temperature = stateTemperature,
+                    temperatureExternal = stateExternalTemperature,
                     humidity = stateHumidity,
                     pressure = statePressure
                 )
@@ -115,8 +168,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             viewModel.history.observerAndUpdateScreen1(stateHistory) {
-                val list = it.subList((it.size -24).coerceAtLeast(0), it.size)
-                if(stateHistory.value.containsAll(list)) null
+                val list = it.subList((it.size - 24).coerceAtLeast(0), it.size)
+                if (stateHistory.value.containsAll(list)) null
                 else {
                     s1 = s1.copy(history = list)
                     it
@@ -134,8 +187,22 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            viewModel.forecastLiveData.observe(this) {
+            viewModel.netatmoLiveData.observerAndUpdateScreen1(stateExternalTemperature) {
+                val currentTemperature = it.maxByOrNull { pair -> pair.first }?.second
+                if (currentTemperature == null || currentTemperature.toFloat()
+                        .round(1) == stateTemperature.value?.round(1)
+                )
+                    null
+                else {
+                    s1 = s1.copy(temperatureExternal = currentTemperature.toFloat())
+                    currentTemperature.toFloat().round(1)
+                }
+            }
+
+            viewModel.forecastLiveData.observe(lifecycleOwner = this) {
                 stateForecast.value = it
+                weatherMap = it
+
                 s2 = Screen2(it)
                 rootView.postDelayed({
                     bitmap = generateBitmap()
@@ -146,6 +213,8 @@ class MainActivity : AppCompatActivity() {
                     )
                 }, 500L)
             }
+
+
         }
 
         mDevice = try {
@@ -164,14 +233,9 @@ class MainActivity : AppCompatActivity() {
 
         pwm = PeripheralManager.getInstance().openPwm("PWM1")
 
-        val pwm0 =  PeripheralManager.getInstance().openPwm("PWM0")
-        pwm0.setPwmDutyCycle(90.0)
-        pwm0.setPwmFrequencyHz(256.0)
-        pwm0.setEnabled(true)
-
         viewModel.getRecordHistory(from = Dates.yesterday)
 
-        viewModel.workerStatus.observe(this) { list ->
+        viewModel.workerOwmStatus.observe(lifecycleOwner = this) { list ->
             list.forEach {
 
                 when (it.state) {
@@ -180,6 +244,23 @@ class MainActivity : AppCompatActivity() {
 
                         DarkSkyResult.result?.apply {
                             viewModel.forecastLiveData.value = this
+                        }
+                    }
+                    else -> {
+                    }
+                }
+            }
+        }
+
+        viewModel.workerNetatmoStatus.observe(lifecycleOwner = this) { list ->
+            list.forEach {
+
+                when (it.state) {
+                    //ENQUEUED because a PeriodicWork never goes SUCCEEDED, it goes directly to ENQUEUED
+                    WorkInfo.State.SUCCEEDED, WorkInfo.State.ENQUEUED -> {
+
+                        NetatmoResult.result?.apply {
+                            viewModel.netatmoLiveData.value = this
                         }
                     }
                     else -> {
@@ -226,7 +307,7 @@ class MainActivity : AppCompatActivity() {
     private val rootView by lazy { window.decorView.rootView }
 
     private fun generateBitmap(): Bitmap {
-        if(this::bitmap.isInitialized) bitmap.recycle()
+        if (this::bitmap.isInitialized) bitmap.recycle()
         val (width, height) = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             600f,
@@ -286,12 +367,24 @@ class MainActivity : AppCompatActivity() {
             delay(1000)
             buzzer.playMelody(Mario.melodyShort.first, Mario.melodyShort.second)
         }
+
+        try {
+            registerReceiver(
+                tickReceiver,
+                IntentFilter().apply { addAction(Intent.ACTION_TIME_TICK) })
+        } catch (_: Exception) {
+        }
     }
 
     override fun onStop() {
         super.onStop()
         // Interrupt events no longer necessary
         mDevice?.unregisterUartDeviceCallback(uartCallback)
+
+        try {
+            unregisterReceiver(tickReceiver)
+        } catch (_: Exception) {
+        }
     }
 
     override fun onDestroy() {
@@ -318,7 +411,16 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                networkViewModel.switchPressed(readUartBuffer(uart))
+                val bytes = readUartBuffer(uart)
+                networkViewModel.switchPressed(bytes).observe(lifecycleOwner = this@MainActivity) {
+                    if(!it) viewModel.saveUnknownSignal(
+                        UnknownSignal(
+                            hexa = bytes.toHexString(),
+                            length = bytes.size,
+                            raw = bytes
+                        )
+                    )
+                }
             } catch (e: IOException) {
                 Log.w(TAG, "Unable to access UART device", e)
             }

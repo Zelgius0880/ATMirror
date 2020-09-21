@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import zelgius.com.atmirror.AppDatabase
 import zelgius.com.atmirror.entities.SensorRecord
+import zelgius.com.atmirror.entities.UnknownSignal
 import java.util.Date
 
 class DatabaseRepository(val context: Context) {
@@ -41,4 +42,8 @@ class DatabaseRepository(val context: Context) {
             db.sensorRecordDao.blockingUpdateTemperature(stamp, temperature)
         }
     }
+
+
+    suspend fun insertUnknownSignal(item: UnknownSignal) =
+        db.unknownSignalDao.insert(item)
 }

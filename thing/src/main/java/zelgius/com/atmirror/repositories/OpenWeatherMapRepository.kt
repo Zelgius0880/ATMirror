@@ -14,7 +14,7 @@ object OpenWeatherMapRepository {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    var service = retrofit.create<DarkSkyService>(DarkSkyService::class.java)
+    var service: DarkSkyService = retrofit.create(DarkSkyService::class.java)
 
     interface DarkSkyService {
         //http://api.openweathermap.org/data/2.5/forecast/daily?lat=<...>&lon=<...>&cnt=5&units=metric&appid=<...>
