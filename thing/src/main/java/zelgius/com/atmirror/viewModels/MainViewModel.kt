@@ -15,7 +15,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import zelgius.com.atmirror.drivers.sht21.SHT21SensorDriver
 import zelgius.com.atmirror.entities.SensorRecord
-import zelgius.com.atmirror.entities.UnknownSignal
 import zelgius.com.atmirror.entities.json.OpenWeatherMap
 import zelgius.com.atmirror.repositories.OpenWeatherMapRepository
 import zelgius.com.atmirror.repositories.DatabaseRepository
@@ -214,16 +213,6 @@ class MainViewModel (private val context: Application) : AndroidViewModel(contex
             }
         }
     }
-
-
-    fun saveUnknownSignal(item: UnknownSignal): LiveData<Long> =
-        MutableLiveData<Long>().also {
-            viewModelScope.launch {
-                with(databaseService.insertUnknownSignal(item)) {
-                    it.value = this
-                }
-            }
-        }
 
 
 

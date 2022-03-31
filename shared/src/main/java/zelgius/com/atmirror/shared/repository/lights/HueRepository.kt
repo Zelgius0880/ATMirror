@@ -64,7 +64,7 @@ object HueService : LightService {
 
                     with(it.body!!.string()) {
                         ip = gson.fromJson(this, Array<HueDiscoverResult>::class.java)
-                            .first()
+                            .first{ip -> ip.internalIpAddress.startsWith("192.168.1.")}
                             .internalIpAddress
 
                         service = retrofit().create(

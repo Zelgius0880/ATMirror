@@ -7,13 +7,11 @@ val kotlinVersion = rootProject.extra.get("kotlinVersion")
 
 
 android {
-    compileSdkVersion( 29)
+    compileSdk = 32
 
     defaultConfig {
-        minSdkVersion( 23)
-        targetSdkVersion (29)
-        versionCode = 1
-        versionName  = "1.0"
+        minSdk =  23
+        targetSdk =32
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles ("consumer-rules.pro")
@@ -30,16 +28,16 @@ android {
 dependencies {
     implementation (fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation ("androidx.core:core-ktx:1.3.1")
-    implementation ("androidx.appcompat:appcompat:1.2.0")
-    testImplementation ("junit:junit:4.13")
-    androidTestImplementation ("androidx.test.ext:junit:1.1.1")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.2.0")
+    implementation ("androidx.core:core-ktx:1.7.0")
+    implementation ("androidx.appcompat:appcompat:1.4.1")
+    testImplementation ("junit:junit:4.13.2")
+    androidTestImplementation ("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
 
     //Paging Library
     val pagingVersion = "2.1.1"
-    api ("androidx.paging:paging-runtime-ktx:2.1.2")
-    api ("com.firebaseui:firebase-ui-firestore:6.2.1")
+    api ("androidx.paging:paging-runtime-ktx:3.1.0")
+    api ("com.firebaseui:firebase-ui-firestore:7.2.0")
 
 
 }

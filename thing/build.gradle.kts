@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+
 val getProps by extra {
     fun(propName: String): String {
         val propsFile = rootProject.file("local.properties")
@@ -16,7 +17,6 @@ val getProps by extra {
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-android-extensions")
     id("com.google.gms.google-services")
     id("kotlin-kapt")
 }
@@ -25,22 +25,22 @@ val kotlinVersion = rootProject.extra.get("kotlinVersion")
 //val getProps = rootProject.extra["getProps"] as (String) -> String
 
 
-val composeVersion by extra { "1.0.0-alpha02" }
+val composeVersion by extra { "1.1.0" }
 
 
 android {
-    compileSdkVersion(29)
+    compileSdk = 32
     defaultConfig {
         applicationId = "zelgius.com.atmirror"
-        minSdkVersion(27)
-        targetSdkVersion(29)
+        minSdk = 27
+        targetSdk = 32
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments (mutableMapOf("room.schemaLocation" to "$projectDir/schemas".toString()))
+                arguments(mutableMapOf("room.schemaLocation" to "$projectDir/schemas".toString()))
             }
         }
     }
@@ -58,8 +58,8 @@ android {
 
             isMinifyEnabled = false
             proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
         getByName("release") {
@@ -74,8 +74,8 @@ android {
             buildConfigField("String", "NETATMO_USER_EMAIL", getProps("netatmo.user.email"))
             isMinifyEnabled = false
             proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
     }
@@ -102,7 +102,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        useIR = true
     }
 
     buildFeatures {
@@ -130,12 +129,13 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":inky"))
     implementation(project(":shared"))
+    implementation("androidx.compose.ui:ui-tooling-preview:1.1.0")
 
-    testImplementation("junit:junit:4.13")
-    androidTestImplementation("androidx.test.ext:junit:1.1.2")
-    compileOnly("com.google.android.things:androidthings:+")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    compileOnly("com.google.android.things:androidthings:1.0")
 
-    implementation("com.google.android.material:material:1.2.1")
+    implementation("com.google.android.material:material:1.5.0")
 
     // You also need to include the following Compose toolkit dependencies.
 /*    implementation("androidx.compose.ui:ui:$composeVersion")
@@ -143,25 +143,25 @@ dependencies {
     implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")*/
-    implementation ("androidx.compose.ui:ui:$composeVersion")
-    // Tooling supp(ort (Previews, etc.))
-    implementation ("androidx.ui:ui-tooling:$composeVersion")
+    implementation( "androidx.activity:activity-compose:1.4.0")
+    implementation("androidx.compose.ui:ui:$composeVersion")
     // Foundation ((Border, Background, Box, Image, Scroll, shapes, animations, etc.))
-    implementation ("androidx.compose.foundation:foundation:$composeVersion")
+    implementation("androidx.compose.foundation:foundation:$composeVersion")
     // Material Des(ign)
-    implementation ("androidx.compose.material:material:$composeVersion")
+    implementation("androidx.compose.material:material:$composeVersion")
     // Material des(ign icons)
-    implementation ("androidx.compose.material:material-icons-core:$composeVersion")
-    implementation ("androidx.compose.material:material-icons-extended:$composeVersion")
+    implementation("androidx.compose.material:material-icons-core:$composeVersion")
+    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     // Integration (with observables)
-    implementation ("androidx.compose.runtime:runtime-livedata:$composeVersion")
+    implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    implementation("com.google.firebase:firebase-database:19.4.0")
+    implementation("com.google.firebase:firebase-database:20.0.3")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("com.zelgius.android-libraries:ContextExtensions:1.0.0")
     implementation("com.zelgius.android-libraries:livedataextensions:1.1.0")
     implementation("com.zelgius.android-libraries:bitmap-ktx:1.0.1")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.1.0")
 
     val lifecycleVersion = "2.2.0"
     // ViewModel and LiveData
@@ -184,9 +184,9 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
 
     //KTX & coroutines
-    implementation("androidx.core:core-ktx:1.5.0-alpha03")
+    implementation("androidx.core:core-ktx:1.8.0-alpha04")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 
 
     //Other Libraries

@@ -26,7 +26,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion( 29)
+    compileSdk = 32
 
     sourceSets {
         /*test.java.srcDirs += 'src/test/kotlin'
@@ -34,10 +34,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion (27)
-        targetSdkVersion (29)
-        versionCode = 1
-        versionName = "1.0"
+        minSdk =27
+        targetSdk = 32
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles ("consumer-rules.pro")
@@ -47,19 +45,11 @@ android {
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles (getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("String", "FIREBASE_PHONE_KEY", getProps("firestore.phone_key") )
-            buildConfigField("String", "FIREBASE_MIRROR_KEY", getProps("firestore.mirror_key") )
             buildConfigField("boolean", "HUE_TESTS", "false")
-            buildConfigField("String", "MIRROR_HUE_NAME", getProps("hue.mirror_name") )
-            buildConfigField("String", "PHONE_HUE_NAME", getProps("hue.phone_name") )
         }
 
         getByName("debug") {
-            buildConfigField("String", "FIREBASE_PHONE_KEY", getProps("firestore.phone_key") )
-            buildConfigField("String", "FIREBASE_MIRROR_KEY", getProps("firestore.mirror_key") )
             buildConfigField("boolean", "HUE_TESTS", "false")
-            buildConfigField("String", "MIRROR_HUE_NAME", getProps("hue.mirror_name") )
-            buildConfigField("String", "PHONE_HUE_NAME", getProps("hue.phone_name") )
         }
     }
     compileOptions {
@@ -75,8 +65,8 @@ dependencies {
     implementation (fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation ("androidx.core:core-ktx:1.5.0-alpha03")
-    implementation ("androidx.appcompat:appcompat:1.2.0")
+    implementation ("androidx.core:core-ktx:1.8.0-alpha04")
+    implementation ("androidx.appcompat:appcompat:1.4.1")
     implementation (project(path= ":utils"))
 
     //Web
@@ -87,10 +77,10 @@ dependencies {
 
     //KTX & coroutines
     val lifecycle_version = "2.2.0"
-    api ("androidx.core:core-ktx:1.5.0-alpha01")
+    api ("androidx.core:core-ktx:1.8.0-alpha04")
     api ("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     api ("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
-    api ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
+    api ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 
     //Firebase
     implementation ("com.google.firebase:firebase-firestore-ktx:21.5.0")
@@ -106,8 +96,8 @@ dependencies {
 
 
     // Tests
-    androidTestImplementation ("androidx.test.ext:junit:1.1.1")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.2.0")
+    androidTestImplementation ("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation ("org.mockito:mockito-core:3.4.6")
     testImplementation ("org.mockito:mockito-core:3.4.6")
     androidTestImplementation ("androidx.arch.core:core-testing:2.1.0")

@@ -8,13 +8,11 @@ val kotlinVersion = rootProject.extra.get("kotlinVersion")
 
 
 android {
-    compileSdkVersion (29)
+    compileSdk = 32
 
     defaultConfig {
-        minSdkVersion (27)
-        targetSdkVersion (29)
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = 27
+        targetSdk=32
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles ( "consumer-rules.pro")
@@ -31,11 +29,11 @@ android {
 dependencies {
     implementation (fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation ("androidx.core:core-ktx:1.5.0-alpha01")
-    implementation ("androidx.appcompat:appcompat:1.2.0")
-    testImplementation ("junit:junit:4.13")
-    androidTestImplementation ("androidx.test.ext:junit:1.1.1")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.2.0")
+    implementation ("androidx.core:core-ktx:1.8.0-alpha04")
+    implementation ("androidx.appcompat:appcompat:1.4.1")
+    testImplementation ("junit:junit:4.13.2")
+    androidTestImplementation ("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
 
 
     api ("gov.nist.math:jama:1.0.3")

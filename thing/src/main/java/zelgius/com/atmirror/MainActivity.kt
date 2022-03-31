@@ -9,14 +9,16 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.state
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ContextAmbient
-import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
@@ -39,7 +41,6 @@ import zelgius.com.atmirror.compose.Screen2View
 import zelgius.com.atmirror.drivers.buzzer.Buzzer
 import zelgius.com.atmirror.drivers.buzzer.BuzzerAndroidThings
 import zelgius.com.atmirror.entities.SensorRecord
-import zelgius.com.atmirror.entities.UnknownSignal
 import zelgius.com.atmirror.entities.json.City
 import zelgius.com.atmirror.entities.json.OpenWeatherMap
 import zelgius.com.atmirror.shared.viewModel.MirrorNetworkViewModel
@@ -62,9 +63,9 @@ import kotlin.math.roundToInt
 private val TAG = MainActivity::class.java.simpleName
 private const val UART_DEVICE_NAME: String = "UART0"
 
-class MainActivity : AppCompatActivity() {
-    private val viewModel by lazy { ViewModelHelper.create<MainViewModel>(this) }
-    private val inkyViewModel by lazy { ViewModelHelper.create<InkyViewModel>(this) }
+class MainActivity : ComponentActivity() {
+    private val viewModel: MainViewModel by viewModels()
+    private val inkyViewModel: InkyViewModel by viewModels()
 
     private lateinit var networkViewModel: MirrorNetworkViewModel
 
@@ -128,14 +129,14 @@ class MainActivity : AppCompatActivity() {
 
 
         setContent {
-            Utils.init(ContextAmbient.current)
-            val stateTemperature: MutableState<Float?> = state { null }
-            val statePressure: MutableState<Int?> = state { null }
-            val stateHumidity: MutableState<Int?> = state { null }
-            val stateHistory: MutableState<List<SensorRecord>> = state { listOf<SensorRecord>() }
+            Utils.init(LocalContext.current)
+            val stateTemperature: MutableState<Float?> = remember { mutableStateOf( null )}
+            val statePressure: MutableState<Int?> =remember { mutableStateOf( null) }
+            val stateHumidity: MutableState<Int?> = remember { mutableStateOf( null) }
+            val stateHistory: MutableState<List<SensorRecord>> =remember { mutableStateOf( listOf()) }
             val stateForecast: MutableState<OpenWeatherMap> =
-                state { OpenWeatherMap(City(name = "", country = "")) }
-            val stateExternalTemperature: MutableState<Float?> = state { null }
+                remember { mutableStateOf( OpenWeatherMap(City(name = "", country = ""))) }
+            val stateExternalTemperature: MutableState<Float?> = remember { mutableStateOf( null )}
             //FIXME using remember{} instead of state{}
 
             Row(modifier = Modifier.size(600.dp, 400.dp)) {
@@ -229,7 +230,7 @@ class MainActivity : AppCompatActivity() {
             configureUartFrame(it)
         }
 
-        networkViewModel = ViewModelHelper.create(this)
+        networkViewModel = MirrorNetworkViewModel(application)
 
         pwm = PeripheralManager.getInstance().openPwm("PWM1")
 
@@ -413,13 +414,6 @@ class MainActivity : AppCompatActivity() {
 
                 val bytes = readUartBuffer(uart)
                 networkViewModel.switchPressed(bytes).observe(lifecycleOwner = this@MainActivity) {
-                    if(!it) viewModel.saveUnknownSignal(
-                        UnknownSignal(
-                            hexa = bytes.toHexString(),
-                            length = bytes.size,
-                            raw = bytes
-                        )
-                    )
                 }
             } catch (e: IOException) {
                 Log.w(TAG, "Unable to access UART device", e)

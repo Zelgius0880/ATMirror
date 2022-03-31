@@ -6,6 +6,7 @@
       <module name="ATMirror.inky" target="11" />
       <module name="ATMirror.lights" target="1.7" />
       <module name="ATMirror.mobile" target="11" />
+      <module name="ATMirror.ShapeRipple" target="11" />
       <module name="ATMirror.shared" target="11" />
       <module name="ATMirror.swipeToDelete" target="11" />
       <module name="ATMirror.thinTest" target="11" />

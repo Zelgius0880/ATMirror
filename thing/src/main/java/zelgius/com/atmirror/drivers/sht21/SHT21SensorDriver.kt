@@ -218,7 +218,6 @@ class HumidityUserDriver(private val device: SHT21) : UserSensorDriver {
             return mUserSensor
         }
 
-    @ExperimentalUnsignedTypes
     override fun read(): UserSensorReading {
         return UserSensorReading(floatArrayOf(device.readHumidity()))
     }

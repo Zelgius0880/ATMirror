@@ -56,7 +56,11 @@ class MirrorNetworkViewModel(val app: Application) : AndroidViewModel(app) {
             with(groupRepository.getGroupFromSwitch(uuid)) {
                 forEach { g ->
                     g.lights.forEach {
-                        lightRepository.setState(it)
+                        try {
+                            lightRepository.setState(it)
+                        } catch(e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 }
                 emit(isNotEmpty())

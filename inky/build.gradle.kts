@@ -12,13 +12,11 @@ val kotlinVersion = rootProject.extra.get("kotlinVersion")
 
 
 android {
-    compileSdkVersion( 29)
+    compileSdk= 32
 
     defaultConfig {
-        minSdkVersion( 23)
-        targetSdkVersion (29)
-        versionCode = 1
-        versionName  = "1.0"
+        minSdk= 23
+        targetSdk=32
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles ("consumer-rules.pro")
@@ -37,6 +35,6 @@ dependencies {
     // junit 5
     testImplementation ("org.junit.jupiter:junit-jupiter-params:5.7.0-M1")
     testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.7.0-M1")
-    api ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
+    api ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 }
 

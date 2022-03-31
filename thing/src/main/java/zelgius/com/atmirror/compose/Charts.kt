@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.state
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.ui.tooling.preview.Preview
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -53,9 +53,9 @@ fun PressureChart(history: State<List<SensorRecord>>) {
         )
     )
 
- /*   val max = (list.maxByOrNull { it.pressure }?.pressure?.toFloat()?:0f)  + 3
-    val min = (list.minByOrNull { it.pressure }?.pressure?.toFloat()?: 0f) - 3
-    val granularity = (max - min) / 4*/
+    /*   val max = (list.maxByOrNull { it.pressure }?.pressure?.toFloat()?:0f)  + 3
+       val min = (list.minByOrNull { it.pressure }?.pressure?.toFloat()?: 0f) - 3
+       val granularity = (max - min) / 4*/
 
     DrawChart(
         data = data,
@@ -77,7 +77,7 @@ private fun DrawChart(
     granularity: Float? = null,
     formatter: ValueFormatter? = null
 ) {
-    val context = ContextAmbient.current
+    val context = LocalContext.current
     val chart = remember {
         Chart(
             context = context,
@@ -138,8 +138,8 @@ fun TemperatureChart(history: State<List<SensorRecord>>) {
     val data = LineData(
         listOf(
             LineDataSet(
-                list.map{
-                    val hour =  (it.stamp - now) / (60 * 60 * 1000)
+                list.map {
+                    val hour = (it.stamp - now) / (60 * 60 * 1000)
                     Entry(hour.toFloat(), it.temperature.toFloat())
                 },
                 "Temperature"
@@ -157,8 +157,8 @@ fun TemperatureChart(history: State<List<SensorRecord>>) {
         )
     )
 
-    val max = (list.minByOrNull { it.temperature }?.temperature?.toFloat()?: 0f) + 3
-    val min = (list.maxByOrNull { it.temperature }?.temperature?.toFloat()?: 0f) - 3
+    val max = (list.minByOrNull { it.temperature }?.temperature?.toFloat() ?: 0f) + 3
+    val min = (list.maxByOrNull { it.temperature }?.temperature?.toFloat() ?: 0f) - 3
     //val granularity = (max - min) / 2
 
     DrawChart(data = data,
@@ -173,7 +173,6 @@ fun TemperatureChart(history: State<List<SensorRecord>>) {
 }
 
 
-
 @Composable
 @Preview
 fun PreviewPressure() {
@@ -186,8 +185,11 @@ fun PreviewPressure() {
         }
     }
 
-    PressureChart(history = state { list })
+    PressureChart(history = remember {
+        mutableStateOf(list)
+    })
 }
+
 @Composable
 @Preview
 fun PreviewChart() {
@@ -201,7 +203,11 @@ fun PreviewChart() {
     }
 
     Column(modifier = Modifier.size(300.dp, 400.dp)) {
-        PressureChart(history = state { list })
-        TemperatureChart(history = state { list })
+        PressureChart(history = remember {
+            mutableStateOf(list)
+        })
+        TemperatureChart(history = remember {
+            mutableStateOf(list)
+        })
     }
 }

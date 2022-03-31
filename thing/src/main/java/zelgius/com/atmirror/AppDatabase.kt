@@ -7,15 +7,12 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import zelgius.com.atmirror.dao.SensorRecordDAO
-import zelgius.com.atmirror.dao.UnknownSignalDao
 import zelgius.com.atmirror.entities.SensorRecord
-import zelgius.com.atmirror.entities.UnknownSignal
 
 
-@Database(entities = [SensorRecord::class, UnknownSignal::class], version = 3)
+@Database(entities = [SensorRecord::class], version = 3)
 abstract class AppDatabase: RoomDatabase() {
     abstract val sensorRecordDao: SensorRecordDAO
-    abstract val unknownSignalDao: UnknownSignalDao
 
     companion object {
         var db: AppDatabase? = null

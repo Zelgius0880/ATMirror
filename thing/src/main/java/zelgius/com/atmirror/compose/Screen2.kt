@@ -1,27 +1,29 @@
 package zelgius.com.atmirror.compose
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.Box
-import androidx.compose.foundation.ContentGravity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.state
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomEnd
+import androidx.compose.ui.Alignment.Companion.CenterEnd
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ContextAmbient
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.ui.tooling.preview.Preview
 import com.google.gson.Gson
 import zelgius.com.atmirror.R
 import zelgius.com.atmirror.entities.json.ForecastData
@@ -44,7 +46,7 @@ data class Screen2(val forecast: OpenWeatherMap) {
 
 @Composable
 fun Screen2View(forecast: MutableState<OpenWeatherMap>) {
-    Box(Modifier.size(300.dp, 400.dp)) {
+    Column(Modifier.size(300.dp, 400.dp)) {
         forecast.value.apply {
             if (list.size >= 6) {
                 (0 until 6 step 2).forEach {
@@ -61,7 +63,7 @@ fun Screen2View(forecast: MutableState<OpenWeatherMap>) {
 @Composable
 fun ForecastCell(item: ForecastData) {
 
-    Column(modifier = Modifier.size(150.dp, 133.dp) + Modifier.padding(top = 4.dp)) {
+    Column(modifier = Modifier.size(150.dp, 133.dp).padding(top = 4.dp)) {
 
         ForecastCellHeader(item)
 
@@ -71,18 +73,19 @@ fun ForecastCell(item: ForecastData) {
             thickness = 2.dp
         )
 
-        Stack(modifier = Modifier.height(90.dp) + Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.height(90.dp).fillMaxWidth()) {
             Image(
-                vectorResource(id = getIconId(item)),
-                modifier = Modifier.fillMaxHeight() + Modifier.fillMaxWidth(),
+                painter = painterResource(getIconId(item)),
+                modifier = Modifier.fillMaxHeight().fillMaxWidth(),
                 contentScale = ContentScale.FillHeight,
-                colorFilter = tint(CColor.White)
+                colorFilter = tint(CColor.White),
+                contentDescription = null
             )
 
             Box(
-                gravity = ContentGravity.TopStart,
-                modifier = Modifier.fillMaxHeight() + Modifier.fillMaxWidth()
-                        + Modifier.padding(horizontal = 8.dp)
+                contentAlignment = TopStart,
+                modifier = Modifier.fillMaxHeight().fillMaxWidth()
+                       .padding(horizontal = 8.dp)
             ) {
                 Text(
                     String.format("%.1f", item.temp.max), style = TextStyle(
@@ -98,9 +101,9 @@ fun ForecastCell(item: ForecastData) {
             }
 
             Box(
-                gravity = ContentGravity.BottomEnd,
-                modifier = Modifier.fillMaxHeight() + Modifier.fillMaxWidth()
-                        + Modifier.padding(horizontal = 8.dp)
+                contentAlignment = BottomEnd,
+                modifier = Modifier.fillMaxHeight().fillMaxWidth()
+                       .padding(horizontal = 8.dp)
             ) {
                 Text(
                     String.format("%.1f", item.temp.min),
@@ -143,9 +146,9 @@ private fun ForecastCellHeader(item: ForecastData) {
     val date = (item.time * 1000).toLocalDateTime(ZoneId.of("Europe/Brussels"))
     val now = LocalDateTime.now(ZoneId.of("Europe/Brussels"))
     val day = if (now.dayOfMonth == date.dayOfMonth) {
-        ContextAmbient.current.getString(R.string.today)
+        LocalContext.current.getString(R.string.today)
     } else {
-        val array = ContextAmbient.current.resources.getStringArray(R.array.day_of_the_week)
+        val array = LocalContext.current.resources.getStringArray(R.array.day_of_the_week)
 
         when (date.dayOfWeek) {
             DayOfWeek.MONDAY -> array[0]
@@ -162,7 +165,7 @@ private fun ForecastCellHeader(item: ForecastData) {
 
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
-        verticalGravity = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = day,
@@ -171,17 +174,18 @@ private fun ForecastCellHeader(item: ForecastData) {
             )
         )
 
-        Box(modifier = Modifier.fillMaxWidth(), gravity = ContentGravity.CenterEnd) {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = CenterEnd) {
             Row {
                 Image(
+                    painterResource(id = R.drawable.ic_wi_rain),
                     modifier = Modifier.width(14.dp),
-                    asset = vectorResource(id = R.drawable.ic_wi_rain),
                     colorFilter = tint(CColor.White),
                     contentScale = ContentScale.FillWidth,
-                    alignment = Alignment.TopCenter
+                    alignment = Alignment.TopCenter,
+                    contentDescription = null
                 )
 
-                Box(modifier = Modifier.height(30.dp), gravity = ContentGravity.CenterEnd) {
+                Box(modifier = Modifier.height(30.dp), contentAlignment = CenterEnd) {
                     Text(
                         text = String.format("%.0f%%", item.pop * 100),
                         style = TextStyle(
@@ -205,7 +209,7 @@ private fun Cell() {
 private fun Preview() {
 
     //Box(Modifier.size(300.dp, 400.dp)) {
-        Screen2View(state { Gson().fromJson(sample, OpenWeatherMap::class.java) })
+        Screen2View(remember { mutableStateOf( Gson().fromJson(sample, OpenWeatherMap::class.java) )})
     //}
 }
 

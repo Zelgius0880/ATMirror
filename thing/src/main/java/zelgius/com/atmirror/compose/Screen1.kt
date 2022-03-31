@@ -2,27 +2,21 @@ package zelgius.com.atmirror.compose
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import androidx.annotation.StringRes
-import androidx.compose.foundation.Box
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.state
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-import androidx.ui.tooling.preview.Preview
 import zelgius.com.atmirror.R
 import zelgius.com.atmirror.entities.SensorRecord
 import java.util.*
@@ -71,13 +65,13 @@ fun Screen1View(
 
         Temperature(temperature, temperatureExternal)
 
-        Box(Modifier.fillMaxWidth() + Modifier.height(120.dp)) {
+        Box(Modifier.fillMaxWidth() .height(120.dp)) {
             TemperatureChart(history = history)
         }
 
         Pressure(pressure = pressure, humidity = humidity)
 
-        Box(Modifier.fillMaxWidth() + Modifier.height(120.dp)) {
+        Box(Modifier.fillMaxWidth() .height(120.dp)) {
 
             PressureChart(history = history)
         }
@@ -85,12 +79,12 @@ fun Screen1View(
 }
 
 @Composable
-private fun Temperature(temperature: State<Float?>, temperatureExternal: State<Float?>, ) {
-    Row() {
+private fun Temperature(temperature: State<Float?>, temperatureExternal: State<Float?>) {
+    Row {
 
         Column(modifier = Modifier.weight(1f, true)) {
             Text(
-                stringResource(id = R.string.temperature_in).toUpperCase(Locale.getDefault()),
+                stringResource(id = R.string.temperature_in).uppercase(Locale.getDefault()),
                 style = TextStyle(
                     fontSize = 16.sp, textAlign = TextAlign.Start,
                     color = CColor(Color.RED),
@@ -114,7 +108,7 @@ private fun Temperature(temperature: State<Float?>, temperatureExternal: State<F
 
         Column(modifier = Modifier.weight(1f, true)) {
             Text(
-                stringResource(id = R.string.temperature_out).toUpperCase(Locale.getDefault()),
+                stringResource(id = R.string.temperature_out).uppercase(Locale.getDefault()),
                 style = TextStyle(
                     fontSize = 16.sp, textAlign = TextAlign.Start,
                     color = CColor(Color.RED),
@@ -146,7 +140,7 @@ const val BAROMETER_RANGE_HIGH = 1035f
 @Composable
 fun Pressure(pressure: State<Int?>, humidity: MutableState<Int?>) {
     Row(
-        modifier = Modifier.fillMaxWidth() + Modifier.padding(top = 18.dp)
+        modifier = Modifier.fillMaxWidth().padding(top = 18.dp)
     ) {
         Text(
             "${
@@ -187,14 +181,17 @@ fun ForecastByPressure(pressure: State<Int?>, humidity: MutableState<Int?>) {
         n = 0.coerceAtLeast(n.coerceAtMost(barometerIcons.size - 1))
 
         Row(
-            modifier = Modifier.fillMaxWidth() + Modifier.padding(end = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Image(
-                asset = vectorResource(id = barometerIcons[n]),
-                modifier = Modifier.size(56.dp, 56.dp) + Modifier.padding(4.dp),
+                painterResource(id = barometerIcons[n]),
+                modifier = Modifier
+                    .size(56.dp, 56.dp)
+                    .padding(4.dp),
                 contentScale = ContentScale.FillWidth,
-                colorFilter = tint(CColor.White)
+                colorFilter = tint(CColor.White),
+                contentDescription = null
             )
 
             Humidity(humidity)
@@ -207,10 +204,11 @@ private fun Humidity(humidity: MutableState<Int?>) {
     Row {
 
         Image(
+            painterResource(id = R.drawable.ic_wi_raindrop),
             modifier = Modifier.width(12.dp),
-            asset = vectorResource(id = R.drawable.ic_wi_raindrop),
             colorFilter = tint(CColor.White),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
+            contentDescription = null
         )
 
         Text(
@@ -231,19 +229,20 @@ private fun Humidity(humidity: MutableState<Int?>) {
 @Composable
 @Preview
 private fun Preview() {
-    val stateTemperature: MutableState<Float?> = state { 21f }
-    val stateTemperatureExternal: MutableState<Float?> = state { 19f }
-    val statePressure: MutableState<Int?> = state { 988 }
-    val stateHumidity: MutableState<Int?> = state { 50 }
+    val stateTemperature: MutableState<Float?> = remember { mutableStateOf(21f) }
+    val stateTemperatureExternal: MutableState<Float?> = remember { mutableStateOf(19f) }
+    val statePressure: MutableState<Int?> = remember { mutableStateOf(988) }
+    val stateHumidity: MutableState<Int?> = remember { mutableStateOf(50) }
     val now = Date().time
-    val stateHistory: MutableState<List<SensorRecord>> = state {
-        (0 until 24).map {
-            SensorRecord().apply {
-                temperature = Random.nextDouble(16.0, 27.0)
-                pressure = Random.nextDouble(966.0, 1024.0)
-                stamp = now - it * 60 * 60 * 1000
-            }
-        }
+    val stateHistory: MutableState<List<SensorRecord>> = remember {
+        mutableStateOf(
+            (0 until 24).map {
+                SensorRecord().apply {
+                    temperature = Random.nextDouble(16.0, 27.0)
+                    pressure = Random.nextDouble(966.0, 1024.0)
+                    stamp = now - it * 60 * 60 * 1000
+                }
+            })
     }
 
     Screen1View(
