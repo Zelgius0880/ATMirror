@@ -40,9 +40,10 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
             .setLifecycleOwner(lifecycleOwner)
             .setQuery(
                 groupRepository.getItemsQuery(_group.value!!),
-                PagingConfig(20, 10, false),
-                GroupItem::class.java
-            )
+                PagingConfig(20, 10, false)
+            ) {
+                FirestoreGroupItemMapper.map(it)
+            }
             .build()
 
     fun save(group: Group): LiveData<Boolean> {
