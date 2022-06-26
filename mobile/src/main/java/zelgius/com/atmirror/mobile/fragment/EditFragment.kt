@@ -2,9 +2,10 @@ package zelgius.com.atmirror.mobile.fragment
 
 import android.os.Bundle
 import android.view.*
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.firebase.ui.firestore.paging.LoadingState
+import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
@@ -32,21 +33,21 @@ class EditFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
-        }
+    }
 
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            _binding = FragmentEditBinding.inflate(inflater, container, false)
-            return binding.root
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentEditBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-            super.onViewCreated(view, savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         adapter = EditGroupAdapter(
-            editViewModel.getItems(),
+            editViewModel.getItems(viewLifecycleOwner),
             itemChangedListener = {
                 editViewModel.save(it, true).observe(this@EditFragment) {
                     Snackbar.make(binding.root, R.string.item_saved, Snackbar.LENGTH_SHORT)
@@ -56,36 +57,27 @@ class EditFragment : Fragment() {
                 }
             },
             itemRemovedListener = {
-                editViewModel.delete(it).observe(this) { _ ->
+                editViewModel.delete(it).observe(viewLifecycleOwner) { _ ->
                     adapter.refresh()
                     showUndoSnackBar(it)
                 }
             }
         )
-        adapter.loadingStatus.observe(this) {
+        adapter.loadingStatus.observe(viewLifecycleOwner) {
             when (it) {
-                LoadingState.LOADING_INITIAL -> {
-                }
-                LoadingState.LOADING_MORE -> {
-                }
-                LoadingState.LOADED -> {
-                    binding.progressBarList.visibility = View.INVISIBLE
-                }
-                LoadingState.FINISHED -> {
-                    binding.progressBarList.visibility = View.INVISIBLE
-                }
-                LoadingState.ERROR -> {
-                }
+                is LoadState.NotLoading -> binding.progressBarList.isVisible = false
+                LoadState.Loading -> binding.progressBarList.isVisible = true
+                is LoadState.Error -> binding.progressBarList.isVisible = false
             }
         }
 
         binding.recyclerView.adapter = adapter
 
-        editViewModel.group.observe(this) {
+        editViewModel.group.observe(viewLifecycleOwner) {
             binding.groupName.editText?.setText(it.name)
         }
 
-        editViewModel.progress.observe(this) {
+        editViewModel.progress.observe(viewLifecycleOwner) {
             if (it) {
                 binding.progressBar.visibility = View.VISIBLE
                 binding.saveName.visibility = View.GONE
@@ -141,7 +133,7 @@ class EditFragment : Fragment() {
         Snackbar.make(binding.root, R.string.item_deleted, Snackbar.LENGTH_LONG)
             .setAction(R.string.undo) {
                 item.key = null
-                editViewModel.save(item).observe(this) {
+                editViewModel.save(item).observe(viewLifecycleOwner) {
                     adapter.refresh()
                 }
             }

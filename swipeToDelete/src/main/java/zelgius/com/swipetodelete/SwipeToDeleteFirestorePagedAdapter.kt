@@ -1,5 +1,8 @@
 package zelgius.com.swipetodelete
 
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
+import androidx.paging.LoadType
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.paging.FirestorePagingAdapter
@@ -12,6 +15,13 @@ abstract class SwipeToDeleteFirestorePagedAdapter<T, VH : RecyclerView.ViewHolde
     var deleteListener: (item: T) -> Unit = {}
 ) : FirestorePagingAdapter<T, VH>(options) {
     lateinit var itemTouchHelper: ItemTouchHelper
+
+    private val loadStateListener: (CombinedLoadStates) -> Unit = {
+        onLoadStateChanged(it.refresh)
+    }
+
+    open fun onLoadStateChanged(state: LoadState) {
+    }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -29,6 +39,7 @@ abstract class SwipeToDeleteFirestorePagedAdapter<T, VH : RecyclerView.ViewHolde
 
         itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
+        addLoadStateListener(loadStateListener)
     }
 
     open fun getData(position: Int) = getItem(position)?.toObject(clazz)

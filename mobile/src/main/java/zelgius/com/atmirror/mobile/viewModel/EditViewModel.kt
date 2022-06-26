@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.annotation.BoolRes
 import androidx.lifecycle.*
 import androidx.paging.PagedList
+import androidx.paging.PagingConfig
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.entity.Group
@@ -30,23 +31,19 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
     val progress: LiveData<Boolean>
         get() = _progress
 
-    fun getItems() =
-        FirestorePagingOptions.Builder<GroupItem>()
-            .setQuery(
-                groupRepository.getItemsQuery(_group.value!!),
-                PagedList.Config.Builder()
-                    .setEnablePlaceholders(true)
-                    .setPrefetchDistance(10)
-                    .setPageSize(20)
-                    .build()
-            ) {
-                FirestoreGroupItemMapper.map(it)
-            }
-            .build()
-
     fun setGroup(group: Group) {
         _group.value = group
     }
+
+    fun getItems(lifecycleOwner: LifecycleOwner) =
+        FirestorePagingOptions.Builder<GroupItem>()
+            .setLifecycleOwner(lifecycleOwner)
+            .setQuery(
+                groupRepository.getItemsQuery(_group.value!!),
+                PagingConfig(20, 10, false),
+                GroupItem::class.java
+            )
+            .build()
 
     fun save(group: Group): LiveData<Boolean> {
         _progress.value = true
@@ -60,15 +57,15 @@ class EditViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     fun delete(item: GroupItem) = liveData {
-            groupRepository.delete(
-                when (item) {
-                    is Switch -> item.copy(group = editingGroup)
-                    is Light -> item.copy(group = editingGroup)
-                    else -> error("Should not be there")
-                }
-            )
-            emit(true)
-        }
+        groupRepository.delete(
+            when (item) {
+                is Switch -> item.copy(group = editingGroup)
+                is Light -> item.copy(group = editingGroup)
+                else -> error("Should not be there")
+            }
+        )
+        emit(true)
+    }
 
     fun delete(item: Group) =
         liveData {

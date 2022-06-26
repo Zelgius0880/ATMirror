@@ -18,7 +18,6 @@ val getProps by extra {
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("kotlin-android-extensions")
     id("com.google.gms.google-services")
     id("kotlin-kapt")
 }
@@ -27,12 +26,12 @@ val kotlinVersion = rootProject.extra.get("kotlinVersion") as String
 
 
 android {
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "zelgius.com.atmirror.mobile"
         minSdk = 27
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
@@ -62,15 +61,15 @@ android {
 }
 
 val navVersion = "2.3.0"
-val pagingVersion = "2.1.2"
+val pagingVersion = "3.1.1"
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation(fileTree(mapOf("dir" to "src/main/libs", "include" to listOf("*.jar", "*.aar"))))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("androidx.core:core-ktx:1.8.0-alpha04")
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("androidx.core:core-ktx:1.9.0-alpha05")
+    implementation("androidx.appcompat:appcompat:1.4.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation(project(path = ":shared"))
     implementation(project(path = ":utils"))
     implementation(project(path = ":swipeToDelete"))
@@ -91,7 +90,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.1")
 
     //Material
-    implementation("com.google.android.material:material:1.6.0-alpha02")
+    implementation("com.google.android.material:material:1.7.0-alpha02")
 
     // Java language implementation
     implementation("androidx.navigation:navigation-fragment:$navVersion")
@@ -103,7 +102,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
 
 //Paging Library
-    //implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+    implementation ("androidx.paging:paging-runtime-ktx:$pagingVersion")
 
 
     // alternatively - without Android dependencies for testing

@@ -35,7 +35,7 @@ android {
 
     defaultConfig {
         minSdk =27
-        targetSdk = 32
+        targetSdk = 33
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles ("consumer-rules.pro")
@@ -65,8 +65,8 @@ dependencies {
     implementation (fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation ("androidx.core:core-ktx:1.8.0-alpha04")
-    implementation ("androidx.appcompat:appcompat:1.4.1")
+    implementation ("androidx.core:core-ktx:1.9.0-alpha05")
+    implementation ("androidx.appcompat:appcompat:1.4.2")
     implementation (project(path= ":utils"))
 
     //Web
@@ -77,14 +77,14 @@ dependencies {
 
     //KTX & coroutines
     val lifecycle_version = "2.2.0"
-    api ("androidx.core:core-ktx:1.8.0-alpha04")
+    api ("androidx.core:core-ktx:1.9.0-alpha05")
     api ("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     api ("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
     api ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 
     //Firebase
-    implementation ("com.google.firebase:firebase-firestore-ktx:21.5.0")
-    implementation ("com.google.firebase:firebase-auth:19.3.2")
+    implementation ("com.google.firebase:firebase-firestore-ktx:24.2.0")
+    implementation ("com.google.firebase:firebase-auth:21.0.6")
 
     // ViewModel and LiveData
     api  ("androidx.lifecycle:lifecycle-extensions:$lifecycle_version")
@@ -103,9 +103,8 @@ dependencies {
     androidTestImplementation ("androidx.arch.core:core-testing:2.1.0")
 // (Required) Writing and executing Unit Tests on the JUnit Platform
 
-
     //Paging Library
-    val paging_version = "2.1.2"
+    val paging_version = "3.1.1"
     implementation( "androidx.paging:paging-runtime-ktx:$paging_version")
 
 

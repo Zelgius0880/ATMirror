@@ -7,7 +7,7 @@ val getProps by extra {
         return if (propsFile.exists()) {
             val props = Properties()
             props.load(FileInputStream(propsFile))
-            props[propName] as String
+            (props[propName] as String?)?: ""
         } else {
             ""
         }
@@ -25,7 +25,7 @@ val kotlinVersion = rootProject.extra.get("kotlinVersion")
 //val getProps = rootProject.extra["getProps"] as (String) -> String
 
 
-val composeVersion by extra { "1.1.0" }
+val composeVersion by extra { "1.2.0-rc02" }
 
 
 android {
@@ -129,13 +129,13 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":inky"))
     implementation(project(":shared"))
-    implementation("androidx.compose.ui:ui-tooling-preview:1.1.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     compileOnly("com.google.android.things:androidthings:1.0")
 
-    implementation("com.google.android.material:material:1.5.0")
+    implementation("com.google.android.material:material:1.6.1")
 
     // You also need to include the following Compose toolkit dependencies.
 /*    implementation("androidx.compose.ui:ui:$composeVersion")
@@ -156,12 +156,12 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    implementation("com.google.firebase:firebase-database:20.0.3")
+    implementation("com.google.firebase:firebase-database:20.0.5")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("com.zelgius.android-libraries:ContextExtensions:1.0.0")
     implementation("com.zelgius.android-libraries:livedataextensions:1.1.0")
     implementation("com.zelgius.android-libraries:bitmap-ktx:1.0.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.1.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.1.1")
 
     val lifecycleVersion = "2.2.0"
     // ViewModel and LiveData

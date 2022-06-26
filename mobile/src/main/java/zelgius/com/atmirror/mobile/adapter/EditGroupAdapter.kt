@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
-import com.firebase.ui.firestore.paging.LoadingState
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.databinding.AdapterLightEditBinding
 import zelgius.com.atmirror.mobile.databinding.AdapterSwitchBinding
@@ -31,8 +31,8 @@ class EditGroupAdapter(
         deleteListener = { itemRemovedListener(it) }
     ) {
 
-    private val _loadingStatus = MutableLiveData<LoadingState>()
-    val loadingStatus: LiveData<LoadingState>
+    private val _loadingStatus = MutableLiveData<LoadState>()
+    val loadingStatus: LiveData<LoadState>
         get() = _loadingStatus
 
     override fun getItemViewType(position: Int): Int =
@@ -63,22 +63,21 @@ class EditGroupAdapter(
             else -> error("don't know what to do")
         }
 
-    override fun onLoadingStateChanged(state: LoadingState) {
-        super.onLoadingStateChanged(state)
+    override fun onLoadStateChanged(state: LoadState) {
         _loadingStatus.postValue(state)
     }
 
     override fun onBindViewHolder(holder: BindableViewHolder<*>, position: Int, model: GroupItem) {
-            when (holder) {
+        when (holder) {
 
-                is SwitchViewHolder -> (model as Switch).let {
-                    holder.bind(it)
-                }
-
-                is LightViewHolder -> (model as Light).let {
-                    holder.bind(it)
-                }
+            is SwitchViewHolder -> (model as Switch).let {
+                holder.bind(it)
             }
+
+            is LightViewHolder -> (model as Light).let {
+                holder.bind(it)
+            }
+        }
     }
 
     override fun getData(position: Int): GroupItem? {
