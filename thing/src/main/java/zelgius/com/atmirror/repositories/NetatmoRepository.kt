@@ -12,6 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import zelgius.com.atmirror.BuildConfig
 import zelgius.com.utils.toLocalDateTime
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -27,6 +28,7 @@ class NetatmoRepository(val debug: Boolean = false) {
             if (debug)
                 client(
                     OkHttpClient.Builder().also {
+                        it.readTimeout(Duration.ofSeconds(5))
                         val logger = HttpLoggingInterceptor()
                         logger.level = HttpLoggingInterceptor.Level.BODY
                         it.addInterceptor(logger)

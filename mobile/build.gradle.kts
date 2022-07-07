@@ -106,9 +106,10 @@ dependencies {
 
 
     // alternatively - without Android dependencies for testing
-    testImplementation("androidx.paging:paging-common:$pagingVersion")
+    implementation("androidx.paging:paging-common:$pagingVersion")
+    testImplementation("androidx.paging:paging-runtime:$pagingVersion")
     // For Kotlin use paging-common-ktx
 
     // FirebaseUI for Cloud Firestore
-    //implementation "com.firebaseui:firebase-ui-firestore:6.2.1"
+    implementation ("com.firebaseui:firebase-ui-firestore:8.0.1")
 }

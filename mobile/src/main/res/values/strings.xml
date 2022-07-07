@@ -44,6 +44,11 @@
     <string name="edit_fragment">Edit Group</string>
     <string name="add_light_fragment">Add a light</string>
 
+    <plurals name="switch_already_present">
+        <item quantity="one">The switch is already present in %d group</item>
+        <item quantity="other">The switch is already present in %d groups</item>
+    </plurals>
+
     <plurals name="light_not_saved">
         <item quantity="one" formatted="true">the light not save (it probably already exists)</item>
         <item quantity="other" formatted="true">%d lights not save (they probably already exist)</item>

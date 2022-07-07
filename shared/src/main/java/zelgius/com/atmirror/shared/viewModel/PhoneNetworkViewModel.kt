@@ -11,7 +11,7 @@ import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.repository.NetworkRepository
 import zelgius.com.atmirror.shared.entity.State
 
-class PhoneNetworkViewModel(val app: Application) : AndroidViewModel(app) {
+open class PhoneNetworkViewModel(val app: Application) : AndroidViewModel(app) {
     private val _status = MutableLiveData(State.NOT_WORKING)
     val status: LiveData<State>
         get() = _status
