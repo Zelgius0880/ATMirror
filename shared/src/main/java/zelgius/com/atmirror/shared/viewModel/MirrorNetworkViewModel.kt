@@ -6,6 +6,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import zelgius.com.atmirror.shared.BuildConfig
+import zelgius.com.atmirror.shared.entity.Light
 import zelgius.com.atmirror.shared.entity.Switch
 import zelgius.com.atmirror.shared.repository.GroupRepository
 import zelgius.com.atmirror.shared.repository.LightRepository
@@ -26,6 +27,7 @@ class MirrorNetworkViewModel(val app: Application) : AndroidViewModel(app) {
                     repository.stopDiscovery()
                     repository.sendSwitch(null)
                 }
+
                 State.DISCOVERING -> {
                     repository.startDiscovery()
                 }
@@ -55,13 +57,14 @@ class MirrorNetworkViewModel(val app: Application) : AndroidViewModel(app) {
         liveData {
             with(groupRepository.getGroupFromSwitch(uuid)) {
                 forEach { g ->
-                    g.lights.forEach {
-                        try {
-                            lightRepository.setState(it)
-                        } catch(e: Exception) {
-                            e.printStackTrace()
+                    g.lights.groupBy { it.state }
+                        .forEach { (s, l) ->
+                            try {
+                                lightRepository.setState(*l.toTypedArray(), state = s)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
-                    }
                 }
                 emit(isNotEmpty())
             }

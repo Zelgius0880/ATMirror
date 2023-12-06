@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.databinding.DialogLifxConfigBinding
 import zelgius.com.atmirror.mobile.viewModel.LightViewModel

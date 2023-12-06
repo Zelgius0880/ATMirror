@@ -24,12 +24,35 @@ data class Light(
     public override  var group: Group? = null,
     @get:DocumentId
     @set:DocumentId
-    override var key: String? = null
+    override var key: String? = null,
+    val brightness: Int? = null,
+    val saturation: Int? = null,
+    val hue: Int? = null
 ) : ILight, GroupItem(uid, ItemType.LIGHT) {
     constructor() : this(name = "", uid = "", type = ILight.Type.HUE)
 
+    @get:Exclude
+    val color: Array<Int?>?
+        get() {
+            return if(brightness == null && saturation == null && hue == null) null
+            else arrayOf(hue, saturation, brightness)
+        }
 
+        /*set(value) {
+            if(value == null || value.size < 3) {
+                hue = null
+                saturation = null
+                brightness = null
+            } else {
+                hue = value[0]
+                saturation = value[1]
+                brightness = value[2]
+            }
+        }*/
 
+    @get:Exclude
+    @set:Exclude
+    var updateScene: Boolean = false
 
     @get:Exclude
     override val firebasePath

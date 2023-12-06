@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import zelgius.com.atmirror.shared.BuildConfig
 import zelgius.com.atmirror.shared.entity.Light
+import zelgius.com.atmirror.shared.entity.State
 import zelgius.com.lights.repository.ILight
 import zelgius.com.atmirror.shared.repository.lights.LIFXService
 import zelgius.com.atmirror.shared.repository.lights.HueService
@@ -24,8 +25,8 @@ class LightRepository(
 
     var hueUserName = ""
     suspend fun hueUserName(): String {
-        if(hueUserName.isEmpty())
-            hueUserName = getSnapshot("key2","states").getString("key")?:""
+        if (hueUserName.isEmpty())
+            hueUserName = getSnapshot("key2", "states").getString("key") ?: ""
         return hueUserName
     }
 
@@ -52,8 +53,8 @@ class LightRepository(
         CoroutineScope(Dispatchers.IO).launch {
             setUpKeyListener()
 
-            lifxRepository.token = getSnapshot("key1","states").getString("key")?:""
-            hueUserName = getSnapshot("key2","states").getString("key")?:""
+            lifxRepository.token = getSnapshot("key1", "states").getString("key") ?: ""
+            hueUserName = getSnapshot("key2", "states").getString("key") ?: ""
         }
     }
 
@@ -90,16 +91,32 @@ class LightRepository(
     suspend fun getHueList() =
         hueRepository.getLightList(hueUserName())
 
-    suspend fun setState(light: Light) {
-        when (light.type) {
-            ILight.Type.LIFX -> {
-                lifxRepository.setLightState(light, light.state)
-            }
+    suspend fun setState(vararg light: Light, state: Light.State) {
+        val finalState = if (state != Light.State.TOGGLE) state
+        else light.firstOrNull { it.type == ILight.Type.HUE }?.let {
+            val currentState = hueRepository.getLightState(hueUserName(), it.id)
+            if (currentState?.on == true) Light.State.OFF
+            else Light.State.ON
+        } ?: state
 
-            ILight.Type.HUE -> {
-                hueRepository.setLightState(light, light.state, hueUserName())
+        light.groupBy { it.type }.forEach { (type, lights) ->
+            when (type) {
+                ILight.Type.LIFX -> {
+                    lights.forEach {
+                        lifxRepository.setLightState(it, state = finalState)
+                    }
+                }
+
+                ILight.Type.HUE -> {
+                    hueRepository.setLightState(
+                        *lights.toTypedArray(),
+                        state = finalState,
+                        name = hueUserName()
+                    )
+                }
             }
         }
+
     }
 
 }

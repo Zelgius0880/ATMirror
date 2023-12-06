@@ -41,6 +41,10 @@ class NetworkRepository(
             createOrUpdate(StateElement(key =path, state = State.DISCOVERING), "states")
         }
 
+    suspend fun saveCode(state: String, code: String) = withContext(Dispatchers.Default){
+        createOrUpdate(CodeElement(key = "code", state = state, code = code), "states")
+    }
+
     suspend fun stopDiscovery() =
         withContext(Dispatchers.Default) {
             createOrUpdate(StateElement(key = path, state = State.NOT_WORKING), "states")
@@ -65,6 +69,18 @@ class NetworkRepository(
         override var key: String?,
         val state: State
     ) : FirebaseObject
+
+    @IgnoreExtraProperties
+    data class CodeElement(
+        @get:Exclude
+        override val firebasePath: String = "",
+        @get:Exclude
+        @set:Exclude
+        override var key: String?,
+        val state: String,
+        val code: String
+    ) : FirebaseObject
+
 
     fun removeListeners() {
         phoneListenerRegistration?.remove()
@@ -99,7 +115,7 @@ class NetworkRepository(
 
                 if (snapshot != null) {
                     val switch = snapshot.toObject(Switch::class.java)
-                        switchListener.invoke(if(snapshot.exists() && !snapshot.metadata.isFromCache) switch else null)
+                    switchListener.invoke(if(snapshot.exists() && !snapshot.metadata.isFromCache) switch else null)
                 }
             }
     }

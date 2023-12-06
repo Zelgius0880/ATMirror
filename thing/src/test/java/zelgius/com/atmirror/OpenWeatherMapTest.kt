@@ -2,7 +2,7 @@ package zelgius.com.atmirror
 
 import com.google.gson.Gson
 import org.junit.Test
-import zelgius.com.atmirror.entities.json.OpenWeatherMap
+import zelgius.com.atmirror.things.entities.json.OpenWeatherMap
 
 class OpenWeatherMapTest {
 

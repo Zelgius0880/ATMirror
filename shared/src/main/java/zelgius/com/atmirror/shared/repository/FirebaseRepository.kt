@@ -1,11 +1,16 @@
 package zelgius.com.atmirror.shared.repository
 
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
+import zelgius.com.atmirror.shared.BuildConfig.EMAIL
+import zelgius.com.atmirror.shared.BuildConfig.PASSWORD
 import zelgius.com.atmirror.shared.entity.FirebaseObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -295,23 +300,12 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
     }
 
 
-    private suspend fun checkLogin() =
-        if (anonymousAuth) {
-            if (auth.currentUser == null) {
-                suspendCoroutine<FirebaseUser> { continuation ->
-                    auth.signInAnonymously()
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                continuation.resume(auth.currentUser!!)
-                            } else {
-                                continuation.resumeWithException(
-                                    task.exception ?: IllegalStateException("Unknown error")
-                                )
-                            }
-                        }
-                }
-            } else auth.currentUser!!
-        } else null
+    private suspend fun checkLogin() : Boolean{
+        if (auth.currentUser != null) return true
+        return auth.apply {
+            firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
+        }.signInWithEmailAndPassword(EMAIL,PASSWORD).wait()
+    }
 
     suspend fun findCrossCollection(field: String, key: String, path: String): QuerySnapshot {
         val db = db()
@@ -327,5 +321,13 @@ open class FirebaseRepository(val anonymousAuth: Boolean = true) {
                     }
             }
         }
+
+    private suspend fun <T> Task<T>.wait(): Boolean = suspendCancellableCoroutine { continuation ->
+        addOnCompleteListener {
+            if (!it.isSuccessful) it.exception?.printStackTrace()
+
+            continuation.resume(it.isSuccessful)
+        }
+    }
 
 }

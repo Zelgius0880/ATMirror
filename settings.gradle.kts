@@ -8,3 +8,4 @@ include (":thing")
 rootProject.name="ATMirror"
 include (":inky")
 include (":ShapeRipple")
+include (":colorpicker")

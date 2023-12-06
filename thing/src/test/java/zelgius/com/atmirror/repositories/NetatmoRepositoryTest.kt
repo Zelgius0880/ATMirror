@@ -3,6 +3,8 @@ package zelgius.com.atmirror.repositories
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
+import zelgius.com.atmirror.shared.repository.MeasureType
+import zelgius.com.atmirror.shared.repository.NetatmoRepository
 
 class NetatmoRepositoryTest {
     private val repository by lazy { NetatmoRepository(true) }
@@ -42,9 +44,9 @@ class NetatmoRepositoryTest {
     @Test
     fun getTemperatureMeasure() {
         runBlocking {
-            with(repository.getTemperatureMeasure()) {
+            with(repository.getMeasure(module = false, MeasureType.Temperature, MeasureType.Pressure)) {
                 assertNotNull(this)
-                assertFalse(this!!.isEmpty())
+                assertFalse(this.isEmpty())
             }
         }
     }

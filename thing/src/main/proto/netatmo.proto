@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_package = "zelgius.com.atmirror.things.protobuf";
+option java_multiple_files = true;
+
+
+
+message NetatmoResultProto{
+  repeated Entry entries = 1;
+
+  message Entry {
+    int64 time = 1;
+    double value = 2;
+    string measure = 3;
+  }
+}

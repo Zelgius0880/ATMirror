@@ -61,12 +61,13 @@ object LIFXService : LightService {
 
         }
 
-    override suspend fun setLightState(light: Light, state: Light.State, name: String?) =
-        when (light.state) {
-            Light.State.ON -> setLightState(light.id, "on")
-            Light.State.OFF -> setLightState(light.id, "off")
-            Light.State.TOGGLE -> toggleLightState(light.id)
-        }.firstOrNull()?.status == "ok"
+    override suspend fun setLightState(vararg light: Light, state: Light.State, name: String?) = light.flatMap {
+        when (state) {
+            Light.State.ON -> setLightState(it.id, "on")
+            Light.State.OFF -> setLightState(it.id, "off")
+            Light.State.TOGGLE -> toggleLightState(it.id)
+        }
+    }.firstOrNull()?.status == "ok"
 
 
     override suspend fun getLightList(name: String?) =

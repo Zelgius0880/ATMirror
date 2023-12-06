@@ -1,13 +1,12 @@
 package zelgius.com.atmirror.mobile.fragment
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
-import com.zelgius.livedataextensions.observe
+import zelgius.com.atmirror.shared.BuildConfig
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.GroupAdapter
 import zelgius.com.atmirror.mobile.databinding.*
@@ -17,6 +16,7 @@ import zelgius.com.atmirror.mobile.viewModel.HomeViewModel
 import zelgius.com.atmirror.shared.entity.Group
 import zelgius.com.utils.ViewModelHelper
 import zelgius.com.view_helper_extensions.snackBar
+import java.util.UUID
 
 class HomeFragment : Fragment() {
 
@@ -31,13 +31,13 @@ class HomeFragment : Fragment() {
             editViewModel.setGroup(it)
             navController.navigate(R.id.action_homeFragment_to_editFragment)
         },
-        deleteListener = {
-            editViewModel.delete(it).observe(this) {
-                snackBar(getString(R.string.item_deleted))
-                binding.progressBar.visibility = View.VISIBLE
-                fetchList()
-            }
-        })
+            deleteListener = {
+                editViewModel.delete(it).observe(this) {
+                    snackBar(getString(R.string.item_deleted))
+                    binding.progressBar.visibility = View.VISIBLE
+                    fetchList()
+                }
+            })
     }
     private var _binding: FragmentHomeBinding? = null
     private val navController by lazy { findNavController() }
@@ -80,6 +80,18 @@ class HomeFragment : Fragment() {
                     }
                 }
             }.show(parentFragmentManager, "add_group")
+        }
+
+        binding.settings.setOnClickListener {
+
+            startActivity(Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(
+                    "https://api.netatmo.com/oauth2/authorize?client_id=${BuildConfig.NETATMO_CLIENT_ID}" +
+                            //"&redirect_uri=atmirror%3A%2F%2Ftoken-result" +
+                            "&scope=read_station" +
+                            "&state=${UUID.randomUUID()}"
+                )
+            })
         }
     }
 

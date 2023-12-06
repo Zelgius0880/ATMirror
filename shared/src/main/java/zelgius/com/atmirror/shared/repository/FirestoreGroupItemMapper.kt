@@ -24,7 +24,10 @@ class FirestoreGroupItemMapper {
                         uid = document.getString("uid")!!,
                         name = document.getString("name")!!,
                         type = document.get("type", ILight.Type::class.java)!!,
-                        state = document.get("state", Light.State::class.java)!!
+                        state = document.get("state", Light.State::class.java)!!,
+                        brightness = document.getLong("brightness")?.toInt(),
+                        hue = document.getLong("hue")?.toInt(),
+                        saturation = document.getLong("saturation")?.toInt(),
                     )
                 }
             }

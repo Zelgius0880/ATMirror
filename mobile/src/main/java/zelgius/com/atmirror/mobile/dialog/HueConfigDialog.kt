@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.databinding.DialogHueConfigBinding
 import zelgius.com.atmirror.mobile.viewModel.HueViewModel

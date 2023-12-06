@@ -1,5 +1,8 @@
+import com.google.protobuf.gradle.*
 import java.io.FileInputStream
 import java.util.Properties
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.protobuf
 
 val getProps by extra {
     fun(propName: String): String {
@@ -19,6 +22,8 @@ plugins {
     id("kotlin-android")
     id("com.google.gms.google-services")
     id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+    id ("com.google.protobuf") version "0.9.0"
 }
 
 val kotlinVersion = rootProject.extra.get("kotlinVersion")
@@ -29,11 +34,12 @@ val composeVersion by extra { "1.2.0-rc02" }
 
 
 android {
-    compileSdk = 32
+    compileSdk = 34
+    namespace = "zelgius.com.atmirror.things"
     defaultConfig {
         applicationId = "zelgius.com.atmirror"
         minSdk = 27
-        targetSdk = 32
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -79,29 +85,29 @@ android {
             )
         }
     }
-    lintOptions {
-        disable("AllowBackup", "GoogleAppIndexingWarning", "MissingApplicationIcon")
-    }
-
     packagingOptions {
-        exclude("META-INF/DEPENDENCIES")
-        exclude("META-INF/LICENSE")
-        exclude("META-INF/LICENSE.txt")
-        exclude("META-INF/license.txt")
-        exclude("META-INF/NOTICE")
-        exclude("META-INF/NOTICE.txt")
-        exclude("META-INF/notice.txt")
-        exclude("META-INF/ASL2.0")
-        exclude("META-INF/atomicfu.kotlin_module")
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/ASL2.0",
+                "META-INF/atomicfu.kotlin_module"
+            )
+        }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -110,40 +116,29 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composeVersion
+        kotlinCompilerExtensionVersion = "1.4.7"
+    }
+    lint {
+        disable += setOf("AllowBackup", "GoogleAppIndexingWarning", "MissingApplicationIcon")
     }
 }
-
-
-/*
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs += ["-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check"]
-    }
-}
-*/
 
 
 dependencies {
     implementation(project(":utils"))
     implementation(project(":inky"))
     implementation(project(":shared"))
-    implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.3.1")
+    implementation("androidx.hilt:hilt-common:1.0.0")
 
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation("androidx.test.ext:junit:1.1.4")
     compileOnly("com.google.android.things:androidthings:1.0")
 
-    implementation("com.google.android.material:material:1.6.1")
+    implementation("com.google.android.material:material:1.7.0")
 
     // You also need to include the following Compose toolkit dependencies.
-/*    implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.ui:ui-tooling:$composeVersion")
-    implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
-    implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")*/
-    implementation( "androidx.activity:activity-compose:1.4.0")
+    implementation( "androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui:$composeVersion")
     // Foundation ((Border, Background, Box, Image, Scroll, shapes, animations, etc.))
     implementation("androidx.compose.foundation:foundation:$composeVersion")
@@ -156,12 +151,12 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    implementation("com.google.firebase:firebase-database:20.0.5")
+    implementation("com.google.firebase:firebase-database:20.1.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("com.zelgius.android-libraries:ContextExtensions:1.0.0")
     implementation("com.zelgius.android-libraries:livedataextensions:1.1.0")
     implementation("com.zelgius.android-libraries:bitmap-ktx:1.0.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.1.1")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.3.1")
 
     val lifecycleVersion = "2.2.0"
     // ViewModel and LiveData
@@ -171,7 +166,7 @@ dependencies {
     // alternately - if using Java8, use the following instead of lifecycle-compiler
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-    val workVersion = "2.4.0"
+    val workVersion = "2.7.1"
     implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     //Room
@@ -184,20 +179,49 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
 
     //KTX & coroutines
-    implementation("androidx.core:core-ktx:1.8.0-alpha04")
+    implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
+    //hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    kapt ("androidx.hilt:hilt-compiler:1.0.0")
+    implementation("androidx.hilt:hilt-work:1.0.0")
+
+    // Datastore
+    implementation("androidx.datastore:datastore:1.1.0-alpha04")
+    implementation ( "com.google.protobuf:protobuf-javalite:3.21.7")
 
     //Other Libraries
     implementation(group = "com.github.hotchemi", name = "khronos", version = "0.9.0")
-    implementation("com.facebook.stetho:stetho:1.5.1")
+    implementation("com.facebook.stetho:stetho:1.6.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.google.code.gson:gson:2.8.6")
+    implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.squareup.okhttp3:logging-interceptor:4.8.1")
 }
 
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+kapt {
+    correctErrorTypes = true
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.0.0-rc-2"
+    }
+
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                id("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }

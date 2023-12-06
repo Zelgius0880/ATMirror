@@ -6,7 +6,6 @@ import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.BindableViewHolder
 import zelgius.com.atmirror.mobile.databinding.AdapterHeaderBinding

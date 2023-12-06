@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option java_package = "zelgius.com.atmirror.things.proto";
+option java_multiple_files = true;
+
+message OpenWeatherMapProto{
+  repeated ForecastProto forecast = 1;
+}
+
+message ForecastProto {
+  int64 time = 1;
+  int64 sunrise = 2;
+  int64 sunset = 3;
+  Temperature temp = 4;
+  Temperature feelsLike = 5;
+  double pressure = 6;
+  double humidity = 7;
+  double speed = 8;
+  double deg = 9;
+  double clouds = 10;
+  double pop = 11;
+  double rain = 12;
+  double snow = 13;
+  repeated Weather weather = 14 ;
+
+  message Weather {
+    int32 id = 1;
+    string main = 2;
+    string description = 3;
+    string icon = 4;
+  }
+
+  message Temperature {
+    double min = 1;
+    double max = 2;
+    double day = 3;
+    double night = 4;
+    double eve = 5;
+    double morn = 6;
+  }
+
+}
+
+

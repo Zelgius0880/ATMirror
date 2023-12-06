@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.LoadState
@@ -52,6 +53,7 @@ class EditGroupAdapter(
                         false
                     )
                 )
+
             R.layout.adapter_light_edit ->
                 LightViewHolder(
                     AdapterLightEditBinding.inflate(
@@ -60,6 +62,7 @@ class EditGroupAdapter(
                         false
                     )
                 )
+
             else -> error("don't know what to do")
         }
 
@@ -94,6 +97,7 @@ class EditGroupAdapter(
 
     inner class LightViewHolder(private val binder: AdapterLightEditBinding) :
         BindableViewHolder<Light>(binder.root) {
+
         override fun bind(item: Light) {
             binder.name.text = item.name
             val adapter = LightStatusDropDownAdapter(binder.context)
@@ -125,6 +129,8 @@ class EditGroupAdapter(
                         }
                     }
             }
+
+
         }
     }
 

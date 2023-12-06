@@ -43,6 +43,15 @@
     <string name="home_fragment">Home</string>
     <string name="edit_fragment">Edit Group</string>
     <string name="add_light_fragment">Add a light</string>
+    <string name="netatmo">Netatmo</string>
+    <string name="saturation">Saturation</string>
+    <string name="brightness">Brightness</string>
+    <string name="update_scene">Update scene</string>
+    <plurals name="lights_plurals">
+        <item quantity="zero">%d light</item>
+        <item quantity="one">%d light</item>
+        <item quantity="other">%d lights</item>
+    </plurals>
 
     <plurals name="switch_already_present">
         <item quantity="one">The switch is already present in %d group</item>

@@ -3,7 +3,7 @@ package zelgius.com.atmirror
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import zelgius.com.atmirror.viewModels.MainViewModel
+import zelgius.com.atmirror.things.viewModels.MainViewModel
 import zelgius.com.atmirror.shared.SharedPressureFragment
 import zelgius.com.atmirror.shared.SharedRhFragment
 import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel

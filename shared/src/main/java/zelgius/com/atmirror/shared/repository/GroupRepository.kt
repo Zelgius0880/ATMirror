@@ -165,7 +165,8 @@ class GroupRepository : FirebaseRepository() {
                     createOrUpdate(it, it.firebasePath)
                 }
 
-                group.lights.filterNot { lights.contains(it) }
+                val lightIds = lights.map { it.key }
+                group.lights.filterNot { lightIds.contains(it.key) }
                     .forEach {
                         it.group = group
 

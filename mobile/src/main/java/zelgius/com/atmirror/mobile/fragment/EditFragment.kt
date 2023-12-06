@@ -1,17 +1,19 @@
 package zelgius.com.atmirror.mobile.fragment
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
-import com.zelgius.livedataextensions.observe
 import zelgius.com.atmirror.mobile.R
 import zelgius.com.atmirror.mobile.adapter.EditGroupAdapter
 import zelgius.com.atmirror.mobile.databinding.FragmentEditBinding
 import zelgius.com.atmirror.mobile.dialog.AddSwitchDialog
+import zelgius.com.atmirror.mobile.ui.SceneGroup
 import zelgius.com.atmirror.mobile.viewModel.EditViewModel
 import zelgius.com.atmirror.shared.entity.GroupItem
 import zelgius.com.utils.ViewModelHelper
@@ -38,7 +40,7 @@ class EditFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentEditBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -49,7 +51,7 @@ class EditFragment : Fragment() {
         adapter = EditGroupAdapter(
             editViewModel.getItems(viewLifecycleOwner),
             itemChangedListener = {
-                editViewModel.save(it, true).observe(this@EditFragment) {
+                editViewModel.save(it, true).observe(viewLifecycleOwner) {
                     Snackbar.make(binding.root, R.string.item_saved, Snackbar.LENGTH_SHORT)
                         .show()
 
@@ -93,7 +95,7 @@ class EditFragment : Fragment() {
 
             editViewModel.editingGroup?.apply {
                 name = binding.groupName.text!!
-                editViewModel.save(this).observe(this@EditFragment) {
+                editViewModel.save(this).observe(viewLifecycleOwner) {
                     Snackbar.make(binding.root, R.string.name_save, Snackbar.LENGTH_SHORT)
                         .show()
                 }
@@ -105,7 +107,7 @@ class EditFragment : Fragment() {
         binding.addSwitch.setOnClickListener {
             AddSwitchDialog().apply {
                 listener = {
-                    editViewModel.save(it).observe(this@EditFragment) { saved ->
+                    editViewModel.save(it).observe(viewLifecycleOwner) { saved ->
                         if (!saved)
                             Snackbar.make(
                                 binding.root,
@@ -126,6 +128,10 @@ class EditFragment : Fragment() {
 
         binding.addLight.setOnClickListener {
             findNavController().navigate(R.id.action_editFragment_to_addLightFragment)
+        }
+
+        binding.scenes.setContent {
+            SceneGroup(editViewModel)
         }
     }
 

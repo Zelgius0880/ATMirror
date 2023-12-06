@@ -125,6 +125,10 @@ abstract class InkyHAL(
     )
 
     suspend fun setup() {
+
+
+
+
         writeReset(false)
         delay(100)
         writeReset(true)
@@ -204,12 +208,12 @@ abstract class InkyHAL(
             sendCommand(0x20)  // Trigger Display Update
             delay(50)
 
-            Log.e(TAG, "Render ok")
 
             if (wait) {
                 waitBusy()
                 sendCommand(0x10, 0x01)  // Enter Deep Sleep
             }
+            Log.e(TAG, "Render ok")
         }
 
     fun setPixel(x: Int, y: Int, v: InkyColor) {

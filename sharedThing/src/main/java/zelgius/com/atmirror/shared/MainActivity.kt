@@ -5,7 +5,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.get
-import com.facebook.stetho.Stetho
 import zelgius.com.atmirror.shared.viewModels.SharedMainViewModel
 
 
@@ -30,7 +29,6 @@ abstract class SharedMainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Stetho.initializeWithDefaults(this)
 
         //setContentView(R.layout.activity_main)
         //startTemperaturePressureRequest()

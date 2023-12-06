@@ -5,10 +5,7 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
@@ -19,24 +16,23 @@ import zelgius.com.lights.repository.HueLight
 import zelgius.com.lights.repository.UnsafeOkHttpClient
 import java.io.IOException
 import java.lang.reflect.Type
+import java.net.UnknownHostException
 import kotlin.coroutines.CoroutineContext
 
 
 object HueService : LightService {
 
-    private val firstPartName = "ATMirror"
-    private var client = OkHttpClient()
+    private const val FIRST_PART_NAME = "ATMirror"
 
-    private const val testIp = "http://10.0.2.2:3000"
-    private val retrofit = {
+    private fun retrofit(): Retrofit {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
 
-        with(GsonBuilder()) {
+        return with(GsonBuilder()) {
             this.registerTypeAdapter(HueResponse::class.java, HueResponseConvert())
 
             Retrofit.Builder()
-                .baseUrl(if (BuildConfig.HUE_TESTS) testIp else "https://$ip")
+                .baseUrl("https://$ip")
                 .addConverterFactory(GsonConverterFactory.create(create())).apply {
                     //if (BuildConfig.HUE_TESTS)
                     client(UnsafeOkHttpClient.getUnsafeOkHttpClient(interceptor))
@@ -45,50 +41,22 @@ object HueService : LightService {
         }
     }
 
-    private val gson = Gson()
-    private var ip: String? = null
+    private var ip: String = BuildConfig.HUE_DEFAULT_IP
 
-    private var service = retrofit().create(
-        HueServiceInterface::class.java
-    )
+    private var _service: HueServiceInterface? = null
 
-    private suspend fun getIp(): String? =
-        withContext(Dispatchers.IO) {
-            val request = Request.Builder()
-                .url("https://discovery.meethue.com/")
-                .build()
-
-            try {
-                return@withContext client.newCall(request).execute().let {
-                    if (!it.isSuccessful) return@let null
-
-                    with(it.body!!.string()) {
-                        ip = gson.fromJson(this, Array<HueDiscoverResult>::class.java)
-                            .first{ip -> ip.id == "ecb5fafffe0720e9"}
-                            .internalIpAddress
-
-                        service = retrofit().create(
-                            HueServiceInterface::class.java
-                        )
-
-                        ip
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
+    private val service: HueServiceInterface
+        get() = _service ?: retrofit().create(
+            HueServiceInterface::class.java
+        ).apply {
+            _service = this
         }
-
 
     suspend fun connect(name: String): HueError? =
         withContextError(Dispatchers.IO) {
-            if (ip == null) getIp()
-            println(ip)
-
             val checkResult = service.checkRegistering(
                 name
-            ).execute().body()?.result?.error
+            ).result?.error
             println(checkResult)
 
             checkResult
@@ -97,19 +65,20 @@ object HueService : LightService {
     suspend fun register(deviceType: String = "Android"): String? =
         withContext(Dispatchers.IO) {
             try {
-                if (ip == null) getIp()
                 val registerResult =
                     service.sendRegisteringRequest(
                         HueRegisterRequest(
-                            "${firstPartName}#$deviceType"
+                            "${FIRST_PART_NAME}#$deviceType"
                         )
-                    ).execute().body()
-                        ?.result
+                    ).result
                 println(registerResult)
 
                 if (registerResult?.success?.get("username") != null)
                     registerResult.success["username"]
                 else null
+            } catch (e: UnknownHostException) {
+                _service = null
+                null
             } catch (e: IOException) {
                 e.printStackTrace()
                 null
@@ -117,58 +86,81 @@ object HueService : LightService {
         }
 
 
-    override suspend fun getLightList(name: String?): List<Light>? =
-        withContext(Dispatchers.IO) {
-            if (name == null) throw error("name must not be null")
-            try {
-                with(
-                    service.getLightList(
-                        name
-                    ).execute()
-                ) {
-                    if (!isSuccessful) null
-                    else {
-                        body()?.list?.map {
-                            Light(
-                                name = it.name,
-                                uid = it.id,
-                                type = it.type,
-                                productName = it.productName
-                            )
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
+    override suspend fun getLightList(name: String?): List<Light>? {
+        if (name == null) error("name must not be null")
 
-    override suspend fun setLightState(light: Light, state: Light.State, name: String?): Boolean {
-        if (name == null) throw error("name must not be null")
-        if (ip == null) getIp()
+        return try {
+            service.getLightList(
+                name
+            ).let { response ->
+                response.list?.map {
+                    Light(
+                        name = it.name,
+                        uid = it.id,
+                        type = it.type,
+                        productName = it.productName
+                    )
+                }
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun setLightState(
+        vararg light: Light,
+        state: Light.State,
+        name: String?
+    ): Boolean {
+        if (name == null) error("name must not be null")
         return when (state) {
-            Light.State.ON -> turnOnOffLight(name, light.id, true)
-            Light.State.OFF -> turnOnOffLight(name, light.id, false)
-            Light.State.TOGGLE -> toggleLight(name, light.id)
+            Light.State.ON -> light.map {
+                turnOnOffLight(name, it.id, true, it.hue, it.saturation, it.brightness)
+            }.last()
+
+            Light.State.OFF -> light.map {
+                turnOnOffLight(name, it.id, false, it.hue, it.saturation, it.brightness)
+            }.last()
+
+            Light.State.TOGGLE -> toggleLight(*light, name = name)
         }?.success?.isNotEmpty() ?: false
     }
 
-    private suspend fun turnOnOffLight(name: String, lightNumber: String, on: Boolean): HueResult? =
-        withContext(Dispatchers.IO) {
+    private suspend fun turnOnOffLight(
+        name: String,
+        lightNumber: String,
+        on: Boolean,
+        hue: Int?,
+        saturation: Int?,
+        brightness: Int?
+    ): HueResult? =
+        try {
             service.setLightState(
                 name,
                 lightNumber,
-                HueLightState(on = on)
-            ).execute()
-                .body()?.firstOrNull()
+                HueLightState(
+                    on = on,
+                    hue = hue,
+                    saturation = saturation?.toShort(),
+                    brightness = brightness?.toShort()
+                )
+            ).firstOrNull()
+        } catch (e: UnknownHostException) {
+            _service = null
+            null
         }
 
-    private suspend fun toggleLight(name: String, lightNumber: String): HueResult? {
-        val state = getLightState(name, lightNumber)
+
+    private suspend fun toggleLight(vararg light: Light, name: String): HueResult? {
+        val firstLight = light.first()
+        val state = getLightState(name, firstLight.id)
 
         if (state != null) {
-            return turnOnOffLight(name, lightNumber, state.on != true)
+            return light.map {
+                turnOnOffLight(name, it.id, state.on != true, it.hue, it.saturation, it.brightness)
+            }.last()
         }
         return null
     }
@@ -177,10 +169,11 @@ object HueService : LightService {
         withContext(Dispatchers.IO) {
             try {
                 service.getLightState(
-                    name
-                    , lightNumber
-                ).execute()
-                    .body()?.state
+                    name, lightNumber
+                ).state
+            } catch (e: UnknownHostException) {
+                _service = null
+                null
             } catch (e: IOException) {
                 e.printStackTrace()
                 null
@@ -195,7 +188,7 @@ object HueService : LightService {
         try {
             block()
         } catch (e: IOException) {
-            HueError(type = 0, address = ip ?: "???", description = e.message ?: "unknown")
+            HueError(type = 0, address = ip, description = e.message ?: "unknown")
         }
     }
 }
@@ -220,26 +213,26 @@ data class HueLightState(
 
 interface HueServiceInterface {
     @GET("api/{name}")
-    fun checkRegistering(@Path("name") user: String?): Call<HueResponse>
+    suspend fun checkRegistering(@Path("name") user: String?): HueResponse
 
     @POST("api")
-    fun sendRegisteringRequest(@Body request: HueRegisterRequest): Call<HueResponse>
+    suspend fun sendRegisteringRequest(@Body request: HueRegisterRequest): HueResponse
 
     @GET("api/{userName}/lights")
-    fun getLightList(@Path("userName") userName: String): Call<HueResponse>
+    suspend fun getLightList(@Path("userName") userName: String): HueResponse
 
     @PUT("/api/{userName}/lights/{lightNumber}/state")
-    fun setLightState(
+    suspend fun setLightState(
         @Path("userName") userName: String,
         @Path("lightNumber") lightNumber: String,
         @Body state: HueLightState
-    ): Call<List<HueResult>>
+    ): List<HueResult>
 
-    @GET("/api/{userName}/lights/{lightNumber}")
-    fun getLightState(
-        @Path("userName") userName: String,
+    @GET("clip/v2/resource/light/{lightNumber}")
+    suspend fun getLightState(
+        @Header("hue-application-key") key: String,
         @Path("lightNumber") lightNumber: String
-    ): Call<HueLightStateResponse>
+    ): HueLightStateResponse
 }
 
 data class HueLightStateResponse(val state: HueLightState)
@@ -255,26 +248,22 @@ class HueResponseConvert : JsonDeserializer<HueResponse> {
         json: JsonElement,
         typeOfT: Type,
         context: JsonDeserializationContext
-    ): HueResponse? {
+    ): HueResponse {
         val gson = Gson()
         return if (json.isJsonArray) {
             HueResponse(result = gson.fromJson(json.asJsonArray[0], HueResult::class.java))
         } else {
+            val list = mutableListOf<HueLight>()
             with(json.asJsonObject) {
-                var id = 1
-                val list = mutableListOf<HueLight>()
-                while (has("$id")) {
-                    list.add(gson.fromJson(getAsJsonObject("$id"), HueLight::class.java).also {
-                        it.id = "$id"
+                keySet().forEach { id ->
+                    list.add(gson.fromJson(getAsJsonObject(id), HueLight::class.java).also {
+                        it.id = id
                     })
-                    ++id
                 }
 
                 HueResponse(list = list)
             }
-
         }
 
     }
-
 }

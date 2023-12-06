@@ -1,7 +1,6 @@
 plugins {
-    id("com.android.library")
+    id("com.android.application")
     kotlin("android")
-    id("kotlin-android-extensions")
     id("kotlin-kapt")
 
 }
@@ -51,8 +50,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
@@ -64,7 +63,7 @@ android {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
         freeCompilerArgs = freeCompilerArgs + listOf("-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check")
     }
 }
@@ -129,7 +128,6 @@ dependencies {
     //Other Libraries
     api("com.jjoe64:graphview:4.2.2")
     api(group = "com.github.hotchemi", name=  "khronos", version= "0.9.0")
-    api("com.facebook.stetho:stetho:1.5.1")
     api("com.squareup.retrofit2:retrofit:2.9.0")
     api("com.squareup.retrofit2:converter-gson:2.9.0")
     api("com.google.code.gson:gson:2.8.6")
